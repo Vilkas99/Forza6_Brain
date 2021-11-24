@@ -1,34 +1,29 @@
-from mesa import Agent, Model
-from mesa.space import Grid
-from mesa.time import RandomActivation
+from flask import Flask
+from flask.json import jsonify
+from flask_restful import Api, Resource
+from Mesa.main import Vecindad
 
-from mesa.visualization.modules import CanvasGrid
-from mesa.visualization.ModularVisualization import ModularServer
-from mesa.visualization.UserParam import UserSettableParameter
-
-from mesa.datacollection import DataCollector
-from mesa.visualization.modules import ChartModule
-from tornado.gen import sleep
+app = Flask(__name__)
+api = Api(app)
 
 
+modelado = []
 
-class Vecindad(Model):
-    def __init__(self):
-        super().__init__()
+class InfoModelo(Resource):
         
+    def get(self):
+        miVecindad = modelado[0]
+        if len(miVecindad) == 0:
+            return {'error': "No hemos instanciado ninguna vecindad"}
+        else: 
+            return {'paso': miVecindad.paso}
+  
+    
+    def post(self):
+        modelado.append(Vecindad())
+        return {"data": "Incializado"}
 
-def agent_portrayal(agent):
-    if agent.condition == "Hello":
-        portrayal = {"Shape": "circle", "Filled": "true", "Color": "Green", "r": 0.75, "Layer": 0}
-    return portrayal
+api.add_resource(InfoModelo, "/InfoModelo")
 
-chart = ChartModule([{"Label": "Percent burned", "Color": "Black"}], data_collector_name='datacollector')
-grid = CanvasGrid(agent_portrayal, 50, 50, 450, 450)
-server = ModularServer(Vecindad,
-                       [grid, chart],
-                       "Forest",
-                       {"density": UserSettableParameter("slider", "Tree density", 0.45, 0.01, 1.0, 0.01), 
-                        "width":50, "height":50})
-
-server.port = 8522 # The default
-server.launch()
+if __name__ == "__main__": 
+    app.run(debug=True)
