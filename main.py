@@ -9,21 +9,20 @@ api = Api(app)
 
 modelado = []
 
-class InfoModelo(Resource):
-        
-    def get(self):
-        miVecindad = modelado[0]
-        if len(miVecindad) == 0:
-            return {'error': "No hemos instanciado ninguna vecindad"}
-        else: 
-            return {'paso': miVecindad.paso}
-  
-    
-    def post(self):
-        modelado.append(Vecindad())
-        return {"data": "Incializado"}
+@app.route("/createModel", methods=["POST"])
+def create():
+    modelado.append(Vecindad())
+    return 'ok', 201
 
-api.add_resource(InfoModelo, "/InfoModelo")
+@app.route("/getStepInfo", methods = ["GET"])
+def stepInfo():
+    if (len(modelado) == 0):
+        return 'error: No hay ningún modelo', 404
+    else:
+        vecindad = modelado[0]
+        vecindad.step()
+        return jsonify({"paso": vecindad.paso})
+
 
 if __name__ == "__main__": 
     app.run(debug=True)
