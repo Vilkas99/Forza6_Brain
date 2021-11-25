@@ -6,6 +6,9 @@ from mesa.visualization.modules import CanvasGrid
 from mesa.visualization.ModularVisualization import ModularServer
 from mesa.visualization.UserParam import UserSettableParameter
 
+from Utils.index import AStar
+from random import choice as choice
+
 from mesa.datacollection import DataCollector
 from mesa.visualization.modules import ChartModule
 from tornado.gen import sleep
@@ -26,18 +29,44 @@ class Checkpoint(Agent):
 class Auto(Agent):
     def __init__(self, unique_id: int, model: Model, x : int, y : int, currentState  : str):
         super().__init__(unique_id, model)
-        self.x = x
-        self.y = y
+        
+        self.posicion_x = x
+        self.posicion_y = y
+        self.destino_x = choice(self.model.destinations)[0]
+        self.destino_y = choice(self.model.destinations)[1]
+        self.destino_tmp_x = self.destino_x
+        self.destino_tmp_y = self.destino_y
+
+
         self.currentState = currentState
     
     def step(self):
         pass
+    
+    def evaluateNearCars(self):
+        for neighbor in self.model.space.get_neighbors(self.pos,1):
+            pass
+            
+
+    def setNextAction(self):
+        
+        #astar
+        movimientos = AStar(self.posicion_x, self.posicion_y, self.destino_x, self.destino_y, self.model.matrix)
+        
+        #llamar a  evaluateNearCars
+        
+        
+        
+
+    def completedDestination(self):
+        self.model.grid.remove_agent(self)
 
 
 class Vecindad(Model):
     def __init__(self):
         super().__init__()
         self.paso = 0
+        self.destinos = [(22, 0), (0, 15), (14, 33), (33, 17)]
     
     def step(self):
         self.paso += 1
