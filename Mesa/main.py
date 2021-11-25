@@ -12,10 +12,11 @@ from tornado.gen import sleep
 
 
 class Checkpoint(Agent):
-    def __init__(self, unique_id: int, model: Model, x:int, y: int): 
+    def __init__(self, unique_id: int, model: Model, x:int, y: int, caminoID: str): 
         super().__init__(unique_id, model)
         self.x = x
         self.y = y
+        self.caminoID = caminoID
         self.siguiente = None 
     
     def step(self): 
