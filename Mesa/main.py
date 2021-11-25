@@ -11,6 +11,17 @@ from mesa.visualization.modules import ChartModule
 from tornado.gen import sleep
 
 
+class Checkpoint(Agent):
+    def __init__(self, unique_id: int, model: Model, x:int, y: int): 
+        super().__init__(unique_id, model)
+        self.x = x
+        self.y = y
+        self.siguiente = None 
+    
+    def step(self): 
+        pass 
+
+
 class Auto(Agent):
     def __init__(self, unique_id: int, model: Model, x : int, y : int, currentState  : str):
         super().__init__(unique_id, model)
