@@ -30,33 +30,49 @@ class Auto(Agent):
     def __init__(self, unique_id: int, model: Model, x : int, y : int, currentState  : str):
         super().__init__(unique_id, model)
         
-        self.posicion_x = x
-        self.posicion_y = y
-        self.destino_x = choice(self.model.destinations)[0]
-        self.destino_y = choice(self.model.destinations)[1]
+        destinos = self.model.destinations
+        destino = choice(destinos)
+        self.destino_x = destino[0]
+        self.destino_y = destino[1]
         self.destino_tmp_x = self.destino_x
         self.destino_tmp_y = self.destino_y
 
+        destinos.remove(destino)
+        origen = choice(destinos)
+        self.posicion_x = origen[0]
+        self.posicion_y = origen[1]
+
+        self.detenido = False #Para ver si la intersección permite que el auto avance en este momento
+
+        self.sentido = choice([1, 2]);
+
+        #TODO: mover esto a set next action si después surge la necesidad de recalcular rutas
+        self.movimientos = AStar(self.posicion_x, self.posicion_y, self.destino_x, self.destino_y, self.model.matrix)
 
         self.currentState = currentState
     
     def step(self):
-        pass
+        setNextAction()
     
     def evaluateNearCars(self):
-        for neighbor in self.model.space.get_neighbors(self.pos,1):
-            pass
-            
+        # Revisar si no hay ningún auto en el lugar que toca visitar 
+        for neighbor in self.model.space.get_neighbors((self.posicion_x, self.posicion_y), False):
+            if neighbor.posicion_x == self.destino_tmp_x and neighbor.posicion_y == self.destino_tmp_y:
+                # No puedo ocupar la posición que me correspondía.
+                return False
+        return True
 
     def setNextAction(self):
         
         #astar
-        movimientos = AStar(self.posicion_x, self.posicion_y, self.destino_x, self.destino_y, self.model.matrix)
         
-        #llamar a  evaluateNearCars
+        self.destino_tmp_x =  movimientos[0][0]
+        self.destino_tmp_y =  movimientos[0][1]
         
-        
-        
+        if not evaluateNearCars() and not self.detenido:
+            self.posicion_x = self.destino_tmp_x
+            self.posicion_y = self.destino_tmp_y
+            
 
     def completedDestination(self):
         self.model.grid.remove_agent(self)
@@ -67,6 +83,7 @@ class Vecindad(Model):
         super().__init__()
         self.paso = 0
         self.destinos = [(22, 0), (0, 15), (14, 33), (33, 17)]
+        
     
     def step(self):
         self.paso += 1
