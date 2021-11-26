@@ -61,6 +61,8 @@ class Auto(Agent):
         self.detenido = False #Para ver si la intersección permite que el auto avance en este momento
 
         self.sentido = choice([1, 2])
+        self.valor = None # Ayuda a la interseccion a decidir cuantos autos hay
+        self.orientacion = None # Para calcular la rotación del auto
 
         #TODO: mover esto a set next action si después surge la necesidad de recalcular rutas
         self.movimientos = AStar(self.posicion_x, self.posicion_y, self.destino_x, self.destino_y, self.model.matrix)
@@ -68,7 +70,11 @@ class Auto(Agent):
         self.currentState = currentState
     
     def step(self):
-        setNextAction()
+        
+        if(self.posicion_x == self.destino_x and self.posicion_y == self.destino_y):
+            completedDestination()
+        else:
+            setNextAction()
     
     def evaluateNearCars(self):
         # Revisar si no hay ningún auto en el lugar que toca visitar 
@@ -79,9 +85,7 @@ class Auto(Agent):
         return True
 
     def setNextAction(self):
-        
-        #astar
-            
+                    
         self.destino_tmp_x =  self.movimientos[0][0]
         self.destino_tmp_y =  self.movimientos[0][1]
         
