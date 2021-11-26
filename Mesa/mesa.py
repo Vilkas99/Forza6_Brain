@@ -42,12 +42,57 @@ class Interseccion(Agent):
         self.pos = pos
     def step(self):
         pass
-class Automovil(Agent):
-    def __init__(self, model, pos):
-        super().__init__(model.next_id(), model)
-        self.pos = pos
+class Auto(Agent):
+    def __init__(self, unique_id: int, model: Model, x : int, y : int, currentState  : str):
+        super().__init__(unique_id, model)
+        
+        destinos = self.model.destinations
+        destino = choice(destinos)
+        self.destino_x = destino[0]
+        self.destino_y = destino[1]
+        self.destino_tmp_x = self.destino_x
+        self.destino_tmp_y = self.destino_y
+
+        destinos.remove(destino)
+        origen = choice(destinos)
+        self.posicion_x = origen[0]
+        self.posicion_y = origen[1]
+
+        self.detenido = False #Para ver si la intersección permite que el auto avance en este momento
+
+        self.sentido = choice([1, 2])
+
+        #TODO: mover esto a set next action si después surge la necesidad de recalcular rutas
+        self.movimientos = AStar(self.posicion_x, self.posicion_y, self.destino_x, self.destino_y, self.model.matrix)
+
+        self.currentState = currentState
+    
     def step(self):
-        pass
+        setNextAction()
+    
+    def evaluateNearCars(self):
+        # Revisar si no hay ningún auto en el lugar que toca visitar 
+        for neighbor in self.model.space.get_neighbors((self.posicion_x, self.posicion_y), False):
+            if neighbor.posicion_x == self.destino_tmp_x and neighbor.posicion_y == self.destino_tmp_y:
+                # No puedo ocupar la posición que me correspondía.
+                return False
+        return True
+
+    def setNextAction(self):
+        
+        #astar
+            
+        self.destino_tmp_x =  movimientos[0][0]
+        self.destino_tmp_y =  movimientos[0][1]
+        
+        if not evaluateNearCars() and not self.detenido:
+            self.posicion_x = self.destino_tmp_x
+            self.posicion_y = self.destino_tmp_y
+            
+
+    def completedDestination(self):
+        self.model.grid.remove_agent(self)
+    
 class Sentido1(Agent):
     def __init__(self, model, pos):
         super().__init__(model.next_id(), model)
@@ -66,6 +111,7 @@ class Vecindad(Model):
         super().__init__()
         self.schedule = RandomActivation(self)
         self.grid = MultiGrid(36, 35, torus=False)
+        self.destinos = [(22, 0), (0, 16), (14, 33), (33, 17)]
         self.paso = 0
         # Reglas para crucero de 4 caminos:
         # 1.- Si el carro se encuentra la interseccion desde la parte vertical
@@ -160,7 +206,7 @@ class Vecindad(Model):
 def agent_portrayal(agent):
     if type(agent) is WallBlock:
         return {"Shape": "rect", "w": 1, "h": 1, "Filled": "true", "Color": "Gray", "Layer": 0}
-    elif type(agent) is Automovil:
+    elif type(agent) is Auto:
         return {"Shape": "automovil.png", "Layer": 0}
     elif type(agent) is Sentido1:
         return {"Shape": "rect", "w": 1, "h": 1, "Filled": "true", "Color": "Black", "Layer": 0}
