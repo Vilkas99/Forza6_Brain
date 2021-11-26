@@ -65,7 +65,7 @@ class Auto(Agent):
     def setNextAction(self):
         
         #astar
-        
+            
         self.destino_tmp_x =  movimientos[0][0]
         self.destino_tmp_y =  movimientos[0][1]
         
