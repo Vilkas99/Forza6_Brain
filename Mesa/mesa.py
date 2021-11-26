@@ -72,7 +72,7 @@ class Auto(Agent):
     
     def evaluateNearCars(self):
         # Revisar si no hay ningún auto en el lugar que toca visitar 
-        for neighbor in self.model.space.get_neighbors((self.posicion_x, self.posicion_y), False):
+        for neighbor in self.model.grid.get_neighbors((self.posicion_x, self.posicion_y), False):
             if neighbor.posicion_x == self.destino_tmp_x and neighbor.posicion_y == self.destino_tmp_y:
                 # No puedo ocupar la posición que me correspondía.
                 return False
