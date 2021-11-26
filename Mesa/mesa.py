@@ -46,7 +46,7 @@ class Auto(Agent):
     def __init__(self, unique_id: int, model: Model, x : int, y : int, currentState  : str):
         super().__init__(unique_id, model)
         
-        destinos = self.model.destinations
+        destinos = self.model.destinos
         destino = choice(destinos)
         self.destino_x = destino[0]
         self.destino_y = destino[1]
