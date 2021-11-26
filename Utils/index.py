@@ -64,7 +64,6 @@ def AStar(startRow, startCol, endRow, endCol, graph):
 		
     return reconstructPath(endNode)
 
-
 def initializeNodes(graph):
 	nodes = []
 	
