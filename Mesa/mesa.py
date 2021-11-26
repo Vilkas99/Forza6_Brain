@@ -82,8 +82,8 @@ class Auto(Agent):
         
         #astar
             
-        self.destino_tmp_x =  movimientos[0][0]
-        self.destino_tmp_y =  movimientos[0][1]
+        self.destino_tmp_x =  self.movimientos[0][0]
+        self.destino_tmp_y =  self.movimientos[0][1]
         
         if not evaluateNearCars() and not self.detenido:
             self.posicion_x = self.destino_tmp_x
