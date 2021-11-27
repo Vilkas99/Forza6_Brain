@@ -12,7 +12,7 @@ from tornado.gen import sleep
 
 
 
-
+#Avance M5
 class WallBlock(Agent):
     def __init__(self, model, pos):
         super().__init__(model.next_id(), model)
