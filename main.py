@@ -38,7 +38,6 @@ class CheckPoint(Agent):
 
 class Interseccion(Agent):
 
-    VALUE = 3
     AUTOSV = []
     AUTOSL = []
     AUTOS4 = []
@@ -50,8 +49,6 @@ class Interseccion(Agent):
         self.posicionesL = self.model.interseccionLateral
         self.posicionesV = self.model.interseccionVertical
         self.posiciones4 = self.model.interseccionCuatro
-
-        self.value = self.VALUE
         self.ordenamientoV = self.AUTOSV
         self.ordenamientoL = self.AUTOSL
         self.ordenamiento4 = self.AUTOS4
@@ -67,9 +64,9 @@ class Interseccion(Agent):
             for neighbor in self.model.grid.iter_neighbors(i, moore=True):
                 
                 if neighbor.pos[0] == i[0] & neighbor.pos[1] != i[1]: #SIGNIFICA QUE ES VERTICAL --> Valor de 1
-                    neighbor.orien = 1 #Significa que viene de una calle en vertical
+                    neighbor.orientacion = 1 #Significa que viene de una calle en vertical
 
-                    if neighbor.value == 4: #Si el valor es 4 significa que es un Agente Automovilistico :O
+                    if neighbor.valor == 4: #Si el valor es 4 significa que es un Agente Automovilistico :O
                         countCars += 1 #Cuando se detectan más de un auto
 
                         if countCars > 1:
@@ -82,9 +79,9 @@ class Interseccion(Agent):
 
                 elif neighbor.pos[0] != i[0] & neighbor.pos[1] == i[1]: #SIGNIFICA QUE ES HORIZONTAL --> Valor de 2
 
-                    neighbor.orien = 2 #Significa que viene de una calle en horizontal
+                    neighbor.orientacion = 2 #Significa que viene de una calle en horizontal
 
-                    if neighbor.value == 4: #Si el valor es 4 significa que es un Agente Automovilistico :O
+                    if neighbor.valor == 4: #Si el valor es 4 significa que es un Agente Automovilistico :O
                         countCars += 1 #Cuando se detectan más de un auto
 
                         if countCars > 1:
@@ -102,9 +99,9 @@ class Interseccion(Agent):
             for neighbor in self.model.grid.iter_neighbors(i, moore=True):
                 
                 if neighbor.pos[0] == i[0] & neighbor.pos[1] != i[1]: #SIGNIFICA QUE ES VERTICAL --> Valor de 1
-                    neighbor.orien = 1 #Significa que viene de una calle en vertical
+                    neighbor.orientacion = 1 #Significa que viene de una calle en vertical
 
-                    if neighbor.value == 4: #Si el valor es 4 significa que es un Agente Automovilistico :O
+                    if neighbor.valor == 4: #Si el valor es 4 significa que es un Agente Automovilistico :O
                         countCars += 1 #Cuando se detectan más de un auto
 
                         if countCars > 1:
@@ -117,9 +114,9 @@ class Interseccion(Agent):
 
                 elif neighbor.pos[0] != i[0] & neighbor.pos[1] == i[1]: #SIGNIFICA QUE ES HORIZONTAL --> Valor de 2
 
-                    neighbor.orien = 2 #Significa que viene de una calle en horizontal
+                    neighbor.orientacion = 2 #Significa que viene de una calle en horizontal
 
-                    if neighbor.value == 4: #Si el valor es 4 significa que es un Agente Automovilistico :O
+                    if neighbor.valor == 4: #Si el valor es 4 significa que es un Agente Automovilistico :O
                         countCars += 1 #Cuando se detectan más de un auto
 
                         if countCars > 1:
@@ -137,9 +134,9 @@ class Interseccion(Agent):
             for neighbor in self.model.grid.iter_neighbors(i, moore=True):
                 
                 if neighbor.pos[0] == i[0] & neighbor.pos[1] != i[1]: #SIGNIFICA QUE ES VERTICAL --> Valor de 1
-                    neighbor.orien = 1 #Significa que viene de una calle en vertical
+                    neighbor.orientacion = 1 #Significa que viene de una calle en vertical
 
-                    if neighbor.value == 4: #Si el valor es 4 significa que es un Agente Automovilistico :O
+                    if neighbor.valor == 4: #Si el valor es 4 significa que es un Agente Automovilistico :O
                         countCars += 1 #Cuando se detectan más de un auto
 
                         if countCars > 1:
@@ -152,9 +149,9 @@ class Interseccion(Agent):
 
                 elif neighbor.pos[0] != i[0] & neighbor.pos[1] == i[1]: #SIGNIFICA QUE ES HORIZONTAL --> Valor de 2
 
-                    neighbor.orien = 2 #Significa que viene de una calle en horizontal
+                    neighbor.orientacion = 2 #Significa que viene de una calle en horizontal
 
-                    if neighbor.value == 4: #Si el valor es 4 significa que es un Agente Automovilistico :O
+                    if neighbor.valor == 4: #Si el valor es 4 significa que es un Agente Automovilistico :O
                         countCars += 1 #Cuando se detectan más de un auto
 
                         if countCars > 1:
@@ -170,18 +167,18 @@ class Interseccion(Agent):
     def aignacionDesplazamiento(self):
         for i in self.ordenamiento4:
             print(i)
-            #i.detenido = False
+            i.detenido = False
 
             #------ REGLAS PARA EL CRUCE DE 4 CAMINOS -----
 
-            #if i.orien == 1 Significa que es Vertical
-                #if i.destino_temporal == 1
-                    #i.sentido SE MANTIENE
-            #elif i.orien == 2 Significa que es horizontal
-                #if i.destino_temporal == 1
-                    #i.sentido SE MANTIENE
-                #elif i.destino_temporal == 2
-                    #i.sentido SE CAMBIA
+            if i.orientacion == 1 #Significa que es Vertical
+                if i.destino_temporal == 1
+                    i.sentido #SE MANTIENE
+            elif i.orientacion == 2 #Significa que es horizontal
+                if i.destino_temporal == 1
+                    i.sentido #SE MANTIENE
+                elif i.destino_temporal == 2
+                    i.sentido #SE CAMBIA
 
         for i in self.ordenamientoV:
             print(i)
@@ -189,16 +186,16 @@ class Interseccion(Agent):
 
             #------ REGLAS PARA EL CRUCE VERTICAL -----
 
-            #if i.orien == 1 Significa que es Vertical
-                #if i.destino_temporal == 1
-                    #i.sentido SE MANTIENE
-                #elif i.destino_temporal == 2
-                    #i.sentido SE CAMBIA
-            #elif i.orien == 2 Significa que es horizontal
-                #if i.destino_temporal == 1
-                    #i.sentido SE MANTIENE
-                #elif i.destino_temporal == 2
-                    #i.sentido SE CAMBIA
+            if i.orientacion == 1 #Significa que es Vertical
+                if i.destino_temporal == 1
+                    i.sentido #SE MANTIENE
+                elif i.destino_temporal == 2
+                    i.sentido #SE CAMBIA
+            elif i.orientacion == 2 #Significa que es horizontal
+                if i.destino_temporal == 1
+                    i.sentido #SE MANTIENE
+                elif i.destino_temporal == 2
+                    i.sentido #SE CAMBIA
 
         for i in self.ordenamientoL:
             print(i)
@@ -206,16 +203,16 @@ class Interseccion(Agent):
 
             #------ REGLAS PARA EL CRUCE LATERAL -----
 
-            #if i.orien == 1 Significa que es Vertical
-                #if i.destino_temporal == 1
-                    #i.sentido SE MANTIENE
-                #elif i.destino_temporal == 2
-                    #i.sentido SE CAMBIA
-            #elif i.orien == 2 Significa que es horizontal
-                #if i.destino_temporal == 1
-                    #i.sentido SE MANTIENE
-                #elif i.destino_temporal == 2
-                    #i.sentido SE CAMBIA
+            if i.orientacion == 1 #Significa que es Vertical
+                if i.destino_temporal == 1
+                    i.sentido #SE MANTIENE
+                elif i.destino_temporal == 2
+                    i.sentido #SE CAMBIA
+            elif i.orientacion == 2 #Significa que es horizontal
+                if i.destino_temporal == 1
+                    i.sentido #SE MANTIENE
+                elif i.destino_temporal == 2
+                    i.sentido #SE CAMBIA
 
 class Automovil(Agent):
     VALUE = 4
@@ -224,9 +221,9 @@ class Automovil(Agent):
     def __init__(self, model, pos):
         super().__init__(model.next_id(), model)
         self.pos = pos
-        self.value = self.VALUE
+        self.valor = self.VALUE
         self.orden = self.ORDEN
-        self.orien = self.Orientacion
+        self.orientacion = self.Orientacion
     def step(self):
         pass
 class Sentido1(Agent):
