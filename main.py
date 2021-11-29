@@ -21,7 +21,7 @@ def stepInfo():
     else:
         vecindad = modelado[0]
         vecindad.step()
-        return jsonify({"paso": vecindad.paso})
+        return jsonify(vecindad.updateInfo())
 
 
 if __name__ == "__main__": 

@@ -1,6 +1,6 @@
 from mesa import Agent, Model
 from mesa.space import MultiGrid
-from mesa.time import RandomActivation
+from mesa.time import BaseScheduler, RandomActivation
 
 from random import choice
 from mesa.visualization.modules import CanvasGrid
@@ -66,6 +66,7 @@ class Auto(Agent):
         self.destino_tmp_x = self.destino_x
         self.destino_tmp_y = self.destino_y
         self.detenido = False #Para ver si la intersección permite que el auto avance en este momento
+        self.finalizo = False
 
         self.sentido = choice([1, 2])
         self.valor = None # Ayuda a la interseccion a decidir cuantos autos hay
@@ -78,6 +79,7 @@ class Auto(Agent):
         
         if(self.posicion_x == self.destino_x and self.posicion_y == self.destino_y):
             self.completedDestination()
+            self.finalizo = True
         else:
             self.setNextAction()
     
@@ -127,8 +129,10 @@ class Sentido2(Agent):
 class Vecindad(Model):
     def __init__(self):
         super().__init__()
-        self.schedule = RandomActivation(self)
+        self.schedule = BaseScheduler(self)
         self.grid = MultiGrid(36, 35, torus=False)
+        
+        self.autos = []
 
         self.origenYDestinos = {
             (13, 34) : [(35,18),(0,17),(21,0)],
@@ -221,6 +225,7 @@ class Vecindad(Model):
         carrito = Auto(self.next_id(), self, "1")
         self.grid.place_agent(carrito, (carrito.posicion_x, carrito.posicion_y))
         self.schedule.add(carrito)
+        self.autos.append(carrito)
 
 
 
@@ -232,6 +237,16 @@ class Vecindad(Model):
             carrito = Auto(self.next_id(), self, "1")
             self.grid.place_agent(carrito, (carrito.posicion_x, carrito.posicion_y))
             self.schedule.add(carrito)
+            self.autos.append(carrito)
+    
+    def updateInfo(self):
+        data = []
+        for auto in self.autos: 
+            newDataAuto = {'posX': auto.posicion_x, 'posY': auto.posicion_y, 'finalizo': auto.finalizo, "angulo": auto.orientacion}
+            data.append(newDataAuto)
+        
+        return data
+            
 
         
 
@@ -253,8 +268,8 @@ def agent_portrayal(agent):
 
 
 
-grid = CanvasGrid(agent_portrayal, 36, 35, 400, 400)
+#grid = CanvasGrid(agent_portrayal, 36, 35, 400, 400)
 
-server = ModularServer(Vecindad, [grid], "Reto_Equipo2", {})
-server.port = 8522
-server.launch()
+#server = ModularServer(Vecindad, [grid], "Reto_Equipo2", {})
+#server.port = 8522
+#server.launch()
