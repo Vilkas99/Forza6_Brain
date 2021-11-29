@@ -10,10 +10,10 @@ from mesa.visualization.UserParam import UserSettableParameter
 from mesa.datacollection import DataCollector
 from mesa.visualization.modules import ChartModule
 from tornado.gen import sleep
+from .utils import AStar
 
 import sys
 sys.path.insert(0,'../Utils')
-import index
 
 #Avance M5
 class WallBlock(Agent):
@@ -90,7 +90,7 @@ class Auto(Agent):
         return True
 
     def setNextAction(self):
-        self.movimientos = index.AStar(self.posicion_y, self.posicion_x, self.destino_y, self.destino_x, self.model.matrix) 
+        self.movimientos = AStar(self.posicion_y, self.posicion_x, self.destino_y, self.destino_x, self.model.matrix) 
         if(len(self.movimientos) > 1):     
             self.destino_tmp_x =  self.movimientos[1][1]
             self.destino_tmp_y =  self.movimientos[1][0]

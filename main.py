@@ -1,7 +1,7 @@
 from flask import Flask
 from flask.json import jsonify
 from flask_restful import Api, Resource
-from Mesa.mesa import Vecindad
+from Mesa.brain import Vecindad
 
 app = Flask(__name__)
 api = Api(app)
