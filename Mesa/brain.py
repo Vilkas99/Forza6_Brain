@@ -57,18 +57,14 @@ class Auto(Agent):
     def __init__(self, unique_id, model, currentState):
         super().__init__(unique_id, model)
         self.model = model
-        destinos = self.model.destinos
-        destino = choice(destinos)
+        origen = choice(list(self.model.origenYDestinos))
+        self.posicion_x = origen[0]
+        self.posicion_y = origen[1]
+        destino = choice(self.model.origenYDestinos[origen])
         self.destino_x = destino[0]
         self.destino_y = destino[1]
         self.destino_tmp_x = self.destino_x
         self.destino_tmp_y = self.destino_y
-
-        destinos.remove(destino)
-        origen = choice(destinos)
-        self.posicion_x = origen[0]
-        self.posicion_y = origen[1]
-
         self.detenido = False #Para ver si la intersección permite que el auto avance en este momento
 
         self.sentido = choice([1, 2])
@@ -95,7 +91,6 @@ class Auto(Agent):
 
     def setNextAction(self):
         self.movimientos = index.AStar(self.posicion_y, self.posicion_x, self.destino_y, self.destino_x, self.model.matrix) 
-        print(self.movimientos)
         if(len(self.movimientos) > 1):     
             self.destino_tmp_x =  self.movimientos[1][1]
             self.destino_tmp_y =  self.movimientos[1][0]
@@ -134,7 +129,13 @@ class Vecindad(Model):
         super().__init__()
         self.schedule = RandomActivation(self)
         self.grid = MultiGrid(36, 35, torus=False)
-        self.destinos = [(22, 0), (0, 16), (14, 34), (34, 18)]
+
+        self.origenYDestinos = {
+            (13, 34) : [(35,18),(0,17),(21,0)],
+            (35, 19) : [(14,34),(0,17),(21,0)],
+            (22, 0)  : [(35,18),(0,17),(14,34)],
+            (0 , 16) : [(35,18),(14,34),(21,0)],
+        }
         self.paso = 0
         # Reglas para crucero de 4 caminos:
         # 1.- Si el carro se encuentra la interseccion desde la parte vertical
@@ -218,7 +219,6 @@ class Vecindad(Model):
                 self.grid.place_agent(checkP, checkP.pos)
                 self.schedule.add(checkP)
         carrito = Auto(self.next_id(), self, "1")
-        print( carrito.posicion_x, ",",carrito.posicion_y)
         self.grid.place_agent(carrito, (carrito.posicion_x, carrito.posicion_y))
         self.schedule.add(carrito)
 
@@ -228,6 +228,11 @@ class Vecindad(Model):
     def step(self):
         self.paso += 1
         self.schedule.step()
+        if self.paso % 5 == 0:
+            carrito = Auto(self.next_id(), self, "1")
+            self.grid.place_agent(carrito, (carrito.posicion_x, carrito.posicion_y))
+            self.schedule.add(carrito)
+
         
 
 def agent_portrayal(agent):
