@@ -2,6 +2,7 @@ from mesa import Agent, Model
 from mesa.space import MultiGrid
 from mesa.time import RandomActivation
 
+from random import choice
 from mesa.visualization.modules import CanvasGrid
 from mesa.visualization.ModularVisualization import ModularServer
 from mesa.visualization.UserParam import UserSettableParameter
@@ -10,19 +11,25 @@ from mesa.datacollection import DataCollector
 from mesa.visualization.modules import ChartModule
 from tornado.gen import sleep
 
-
+import sys
+sys.path.insert(0,'../Utils')
+import index
 
 #Avance M5
 class WallBlock(Agent):
     def __init__(self, model, pos):
         super().__init__(model.next_id(), model)
         self.pos = pos
+        self.posicion_x = pos[0]
+        self.posicion_y = pos[1]
     def step(self):
         pass
 class EdgePoint(Agent):
     def __init__(self, model, pos):
         super().__init__(model.next_id(), model)
         self.pos = pos
+        self.posicion_x = pos[0]
+        self.posicion_y = pos[1]
     def step(self):
         pass
     
@@ -30,6 +37,8 @@ class CheckPoint(Agent):
     def __init__(self, model: Model, pos, caminoID: str): 
         super().__init__(model.next_id(), model)
         self.pos = pos
+        self.posicion_x = pos[0]
+        self.posicion_y = pos[1]
         self.caminoID = caminoID
         self.siguiente = None 
     
@@ -40,12 +49,14 @@ class Interseccion(Agent):
     def __init__(self, model, pos):
         super().__init__(model.next_id(), model)
         self.pos = pos
+        self.posicion_x = pos[0]
+        self.posicion_y = pos[1]
     def step(self):
         pass
 class Auto(Agent):
-    def __init__(self, unique_id: int, model: Model, x : int, y : int, currentState  : str):
+    def __init__(self, unique_id, model, currentState):
         super().__init__(unique_id, model)
-        
+        self.model = model
         destinos = self.model.destinos
         destino = choice(destinos)
         self.destino_x = destino[0]
@@ -64,49 +75,55 @@ class Auto(Agent):
         self.valor = None # Ayuda a la interseccion a decidir cuantos autos hay
         self.orientacion = None # Para calcular la rotación del auto
 
-        #TODO: mover esto a set next action si después surge la necesidad de recalcular rutas
-        self.movimientos = AStar(self.posicion_x, self.posicion_y, self.destino_x, self.destino_y, self.model.matrix)
 
         self.currentState = currentState
     
     def step(self):
         
         if(self.posicion_x == self.destino_x and self.posicion_y == self.destino_y):
-            completedDestination()
+            self.completedDestination()
         else:
-            setNextAction()
+            self.setNextAction()
     
     def evaluateNearCars(self):
         # Revisar si no hay ningún auto en el lugar que toca visitar 
         for neighbor in self.model.grid.iter_neighbors((self.posicion_x, self.posicion_y), False):
-            if neighbor.posicion_x == self.destino_tmp_x and neighbor.posicion_y == self.destino_tmp_y:
+            if neighbor.posicion_x == self.destino_tmp_x and neighbor.posicion_y == self.destino_tmp_y and type(neighbor) is Auto:
                 # No puedo ocupar la posición que me correspondía.
                 return False
         return True
 
     def setNextAction(self):
-                    
-        self.destino_tmp_x =  self.movimientos[0][0]
-        self.destino_tmp_y =  self.movimientos[0][1]
+        self.movimientos = index.AStar(self.posicion_y, self.posicion_x, self.destino_y, self.destino_x, self.model.matrix) 
+        if(len(self.movimientos) > 1):     
+            self.destino_tmp_x =  self.movimientos[1][1]
+            self.destino_tmp_y =  self.movimientos[1][0]
+            if self.evaluateNearCars() and not self.detenido:
+                self.posicion_x = self.destino_tmp_x
+                self.posicion_y = self.destino_tmp_y
+                self.model.grid.move_agent(self, (self.posicion_x, self.posicion_y))
+
         
-        if not evaluateNearCars() and not self.detenido:
-            self.posicion_x = self.destino_tmp_x
-            self.posicion_y = self.destino_tmp_y
             
 
     def completedDestination(self):
         self.model.grid.remove_agent(self)
+        self.model.schedule.remove(self)
     
 class Sentido1(Agent):
     def __init__(self, model, pos):
         super().__init__(model.next_id(), model)
         self.pos = pos
+        self.posicion_x = pos[0]
+        self.posicion_y = pos[1]
     def step(self):
         pass
 class Sentido2(Agent):
     def __init__(self, model, pos):
         super().__init__(model.next_id(), model)
         self.pos = pos
+        self.posicion_x = pos[0]
+        self.posicion_y = pos[1]
     def step(self):
         pass
 
@@ -115,7 +132,7 @@ class Vecindad(Model):
         super().__init__()
         self.schedule = RandomActivation(self)
         self.grid = MultiGrid(36, 35, torus=False)
-        self.destinos = [(22, 0), (0, 16), (14, 33), (33, 17)]
+        self.destinos = [(22, 0), (0, 16), (14, 34), (34, 18)]
         self.paso = 0
         # Reglas para crucero de 4 caminos:
         # 1.- Si el carro se encuentra la interseccion desde la parte vertical
@@ -198,6 +215,10 @@ class Vecindad(Model):
                 checkP = CheckPoint(self, (x, y), "1")
                 self.grid.place_agent(checkP, checkP.pos)
                 self.schedule.add(checkP)
+        carrito = Auto(self.next_id(), self, "1")
+        print( carrito.posicion_x, ",",carrito.posicion_y)
+        self.grid.place_agent(carrito, (carrito.posicion_x, carrito.posicion_y))
+        self.schedule.add(carrito)
 
 
 
@@ -211,7 +232,7 @@ def agent_portrayal(agent):
     if type(agent) is WallBlock:
         return {"Shape": "rect", "w": 1, "h": 1, "Filled": "true", "Color": "Gray", "Layer": 0}
     elif type(agent) is Auto:
-        return {"Shape": "automovil.png", "Layer": 0}
+        return {"Shape": "rect", "w": 1, "h": 1, "Filled": "true", "Color": "Yellow", "Layer": 0}
     elif type(agent) is Sentido1:
         return {"Shape": "rect", "w": 1, "h": 1, "Filled": "true", "Color": "Black", "Layer": 0}
     elif type(agent) is EdgePoint:
@@ -227,3 +248,6 @@ def agent_portrayal(agent):
 
 grid = CanvasGrid(agent_portrayal, 36, 35, 400, 400)
 
+server = ModularServer(Vecindad, [grid], "Reto_Equipo2", {})
+server.port = 8522
+server.launch()
