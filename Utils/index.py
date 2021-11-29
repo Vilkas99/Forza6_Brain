@@ -43,7 +43,7 @@ def AStar(startRow, startCol, endRow, endCol, graph):
 			
         neighbors = getNeighboringNodes(currentMinDistanceNode, nodes)
         for neighbor in neighbors:
-            if neighbor.value == 1 or neighbor.value == 2 or neighbor.value==3:
+            if neighbor.value == 0:
                 continue
 			
             tentativeDistanceToNeighbor = currentMinDistanceNode.distanceFromStart + 1

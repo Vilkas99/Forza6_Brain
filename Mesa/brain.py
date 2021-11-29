@@ -95,9 +95,11 @@ class Auto(Agent):
 
     def setNextAction(self):
         self.movimientos = index.AStar(self.posicion_y, self.posicion_x, self.destino_y, self.destino_x, self.model.matrix) 
+        print(self.movimientos)
         if(len(self.movimientos) > 1):     
             self.destino_tmp_x =  self.movimientos[1][1]
             self.destino_tmp_y =  self.movimientos[1][0]
+            
             if self.evaluateNearCars() and not self.detenido:
                 self.posicion_x = self.destino_tmp_x
                 self.posicion_y = self.destino_tmp_y
