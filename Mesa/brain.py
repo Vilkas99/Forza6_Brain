@@ -245,7 +245,7 @@ class Vecindad(Model):
             newDataAuto = {'posX': auto.posicion_x, 'posY': auto.posicion_y, 'finalizo': auto.finalizo, "angulo": auto.orientacion}
             data.append(newDataAuto)
         
-        return data
+        return  {'coches': data}
             
 
         
