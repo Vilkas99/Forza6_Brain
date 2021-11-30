@@ -245,11 +245,15 @@ class Auto(Agent):
         self.valor = 5 # Ayuda a la interseccion a decidir cuantos autos hay
         self.valor = 5 # Ayuda a la interseccion a decidir cuantos autos hay
         self.orientacion = None # Para calcular la rotación del auto
+        
+        self.checkPointsVisitados = [] #Arreglo de tuplas de posiciones
 
 
         self.currentState = currentState
     
     def step(self):
+        
+        
         
         if(self.posicion_x == self.destino_x and self.posicion_y == self.destino_y):
             self.completedDestination()
@@ -265,6 +269,38 @@ class Auto(Agent):
                     # No puedo ocupar la posición que me correspondía.
                     return False
         return True
+    
+    def findCheckpoint(self, camino): 
+        direcciones = [(0,1), (1,0), (-1,0), (0,-1)]
+        queue = [(self.posicion_x, self.posicion_y)]
+        dp = []
+        
+        while queue: 
+            posPorChecar = queue.pop()
+            
+            if posPorChecar in self.model.mapOfPaths[camino] and posPorChecar not in self.checkPointsVisitados: 
+                self.checkPointsVisitados.append(posPorChecar)
+                return posPorChecar
+            
+            if posPorChecar in dp: 
+                continue
+            
+            for direccion in direcciones: 
+                nuevoRow = posPorChecar[0] + direccion[0]
+                nuevoCol = posPorChecar[1] + direccion[1]
+                    
+                dentroX = nuevoRow >= 0 and nuevoRow < len(self.model.matrix)
+                dentroY = nuevoCol >= 0 and nuevoCol < len(self.model.matrix[0])
+                    
+                if dentroX and dentroY: 
+                    nuevoPos = (nuevoCol, nuevoRow)
+                    queue.append(nuevoPos)
+                
+            dp.append(posPorChecar)
+        
+        return None
+                
+        
 
     def setNextAction(self):
         print(self.posicion_x, self.posicion_y)
