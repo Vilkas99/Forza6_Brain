@@ -22,6 +22,7 @@ class WallBlock(Agent):
         self.pos = pos
         self.posicion_x = pos[0]
         self.posicion_y = pos[1]
+        self.valor = 0
     def step(self):
         pass
 class EdgePoint(Agent):
@@ -41,18 +42,191 @@ class CheckPoint(Agent):
         self.posicion_y = pos[1]
         self.caminoID = caminoID
         self.siguiente = None 
+        self.valor = 4
+    def step(self): 
+        pass 
+
     
     def step(self): 
         pass 
 
 class Interseccion(Agent):
+
+    AUTOSV = []
+    AUTOSL = []
+    AUTOS4 = []
+
     def __init__(self, model, pos):
         super().__init__(model.next_id(), model)
         self.pos = pos
-        self.posicion_x = pos[0]
-        self.posicion_y = pos[1]
-    def step(self):
-        pass
+        self.valor = 3
+        self.posicionesL = self.model.interseccionLateral
+        self.posicionesV = self.model.interseccionVertical
+        self.posiciones4 = self.model.interseccionCuatro
+        self.ordenamientoV = self.AUTOSV
+        self.ordenamientoL = self.AUTOSL
+        self.ordenamiento4 = self.AUTOS4
+        self.evaluarEntorno()
+
+    def evaluarEntorno(self):
+        countCars = 0
+        
+        # ||||||||||||||||| EVALUA LAS INTERSECCIONES LATERALES ||||||||||||||||||||||
+
+        for i in self.posicionesL:
+
+            for neighbor in self.model.grid.iter_neighbors(i, moore=True):
+                
+                if neighbor.pos[0] == i[0] & neighbor.pos[1] != i[1]: #SIGNIFICA QUE ES VERTICAL --> Valor de 1
+                    neighbor.orientacion = 1 #Significa que viene de una calle en vertical
+
+                    if neighbor.valor == 5: #Si el valor es 4 significa que es un Agente Automovilistico :O
+                        countCars += 1 #Cuando se detectan más de un auto
+
+                        if countCars > 1:
+                            #Se ingresan los autos en la lista
+                            self.ordenamientoL.append(neighbor)
+                            #Agregar que no se repitan en la lista
+                            
+                            #Se detienen los autos
+                            #Automovil.detenido = True
+
+                elif neighbor.pos[0] != i[0] & neighbor.pos[1] == i[1]: #SIGNIFICA QUE ES HORIZONTAL --> Valor de 2
+
+                    neighbor.orientacion = 2 #Significa que viene de una calle en horizontal
+
+                    if neighbor.valor == 5: #Si el valor es 4 significa que es un Agente Automovilistico :O
+                        countCars += 1 #Cuando se detectan más de un auto
+
+                        if countCars > 1:
+                            #Se ingresan los autos en la lista
+                            self.ordenamientoL.append(neighbor)
+                            #Agregar que no se repitan en la lista
+
+                            #Se detienen los autos
+                            #Automovil.detenido = True
+
+        # ||||||||||||||||| EVALUA LAS INTERSECCIONES VERTICALES ||||||||||||||||||||||
+
+        for i in self.posicionesV:
+
+            for neighbor in self.model.grid.iter_neighbors(i, moore=True):
+                
+                if neighbor.pos[0] == i[0] & neighbor.pos[1] != i[1]: #SIGNIFICA QUE ES VERTICAL --> Valor de 1
+                    neighbor.orientacion = 1 #Significa que viene de una calle en vertical
+
+                    if neighbor.valor == 5: #Si el valor es 4 significa que es un Agente Automovilistico :O
+                        countCars += 1 #Cuando se detectan más de un auto
+
+                        if countCars > 1:
+                            #Se ingresan los autos en la lista
+                            self.ordenamientoV.append(neighbor)
+                            #Agregar que no se repitan en la lista
+                            
+                            #Se detienen los autos
+                            #Automovil.detenido = True
+
+                elif neighbor.pos[0] != i[0] & neighbor.pos[1] == i[1]: #SIGNIFICA QUE ES HORIZONTAL --> Valor de 2
+
+                    neighbor.orientacion = 2 #Significa que viene de una calle en horizontal
+
+                    if neighbor.valor == 5: #Si el valor es 4 significa que es un Agente Automovilistico :O
+                        countCars += 1 #Cuando se detectan más de un auto
+
+                        if countCars > 1:
+                            #Se ingresan los autos en la lista
+                            self.ordenamientoV.append(neighbor)
+                            #Agregar que no se repitan en la lista
+
+                            #Se detienen los autos
+                            #Automovil.detenido = True
+
+        # ||||||||||||||||| EVALUA LAS INTERSECCIONES DE CRUCE 4 ||||||||||||||||||||||
+
+        for i in self.posiciones4:
+
+            for neighbor in self.model.grid.iter_neighbors(i, moore=True):
+                
+                if neighbor.pos[0] == i[0] & neighbor.pos[1] != i[1]: #SIGNIFICA QUE ES VERTICAL --> Valor de 1
+                    neighbor.orientacion = 1 #Significa que viene de una calle en vertical
+
+                    if neighbor.valor == 5: #Si el valor es 4 significa que es un Agente Automovilistico :O
+                        countCars += 1 #Cuando se detectan más de un auto
+
+                        if countCars > 1:
+                            #Se ingresan los autos en la lista
+                            self.ordenamiento4.append(neighbor)
+                            #Agregar que no se repitan en la lista
+                            
+                            #Se detienen los autos
+                            #Automovil.detenido = True
+
+                elif neighbor.pos[0] != i[0] & neighbor.pos[1] == i[1]: #SIGNIFICA QUE ES HORIZONTAL --> Valor de 2
+
+                    neighbor.orientacion = 2 #Significa que viene de una calle en horizontal
+
+                    if neighbor.valor == 5: #Si el valor es 4 significa que es un Agente Automovilistico :O
+                        countCars += 1 #Cuando se detectan más de un auto
+
+                        if countCars > 1:
+                            #Se ingresan los autos en la lista
+                            self.ordenamiento4.append(neighbor)
+                            #Agregar que no se repitan en la lista
+
+                            #Se detienen los autos
+                            #Automovil.detenido = True
+                                 
+                    
+    #Una vez realizado todo, esta función se encargará de hacer que los automoviles se muevan de acuerdo a su orden
+    def aignacionDesplazamiento(self):
+        for i in self.ordenamiento4:
+            print(i)
+            i.detenido = False
+
+            #------ REGLAS PARA EL CRUCE DE 4 CAMINOS -----
+
+            if i.orientacion == 1: #Significa que es Vertical
+                if i.destino_temporal == 1:
+                    i.sentido #SE MANTIENE
+            elif i.orientacion == 2: #Significa que es horizontal
+                if i.destino_temporal == 1:
+                    i.sentido #SE MANTIENE
+                elif i.destino_temporal == 2:
+                    i.sentido #SE CAMBIA
+
+        for i in self.ordenamientoV:
+            print(i)
+            #i.detenido = False
+
+            #------ REGLAS PARA EL CRUCE VERTICAL -----
+
+            if i.orientacion == 1: #Significa que es Vertical
+                if i.destino_temporal == 1:
+                    i.sentido #SE MANTIENE
+                elif i.destino_temporal == 2:
+                    i.sentido #SE CAMBIA
+            elif i.orientacion == 2: #Significa que es horizontal
+                if i.destino_temporal == 1:
+                    i.sentido #SE MANTIENE
+                elif i.destino_temporal == 2:
+                    i.sentido #SE CAMBIA
+
+        for i in self.ordenamientoL:
+            print(i)
+            #i.detenido = False
+
+            #------ REGLAS PARA EL CRUCE LATERAL -----
+
+            if i.orientacion == 1: #Significa que es Vertical
+                if i.destino_temporal == 1:
+                    i.sentido #SE MANTIENE
+                elif i.destino_temporal == 2:
+                    i.sentido #SE CAMBIA
+            elif i.orientacion == 2: #Significa que es horizontal
+                if i.destino_temporal == 1:
+                    i.sentido #SE MANTIENE
+                elif i.destino_temporal == 2:
+                    i.sentido #SE CAMBIA
 class Auto(Agent):
     def __init__(self, unique_id, model, currentState):
         super().__init__(unique_id, model)
@@ -67,9 +241,11 @@ class Auto(Agent):
         self.destino_tmp_y = self.destino_y
         self.detenido = False #Para ver si la intersección permite que el auto avance en este momento
         self.finalizo = False
-
-        self.sentido = choice([1, 2])
-        self.valor = None # Ayuda a la interseccion a decidir cuantos autos hay
+        self.sentido = 2
+        if self.posicion_x == 22 or self.posicion_y == 16:
+            self.sentido = 1
+        self.valor = 5 # Ayuda a la interseccion a decidir cuantos autos hay
+        self.valor = 5 # Ayuda a la interseccion a decidir cuantos autos hay
         self.orientacion = None # Para calcular la rotación del auto
 
 
@@ -86,13 +262,14 @@ class Auto(Agent):
     def evaluateNearCars(self):
         # Revisar si no hay ningún auto en el lugar que toca visitar 
         for neighbor in self.model.grid.iter_neighbors((self.posicion_x, self.posicion_y), False):
-            if neighbor.posicion_x == self.destino_tmp_x and neighbor.posicion_y == self.destino_tmp_y and type(neighbor) is Auto:
-                # No puedo ocupar la posición que me correspondía.
-                return False
+            if type(neighbor) is Auto:
+                if neighbor.posicion_x == self.destino_tmp_x and neighbor.posicion_y == self.destino_tmp_y:
+                    # No puedo ocupar la posición que me correspondía.
+                    return False
         return True
 
     def setNextAction(self):
-        self.movimientos = AStar(self.posicion_y, self.posicion_x, self.destino_y, self.destino_x, self.model.matrix) 
+        self.movimientos = AStar(self.posicion_y, self.posicion_x, self.destino_y, self.destino_x, self.model.matrix, self.sentido) 
         if(len(self.movimientos) > 1):     
             self.destino_tmp_x =  self.movimientos[1][1]
             self.destino_tmp_y =  self.movimientos[1][0]
@@ -168,35 +345,35 @@ class Vecindad(Model):
             [0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,1,0,0,0,0,0,0,0, 0,0,0,0,0,0],
             [0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,0,0,0,0,0,0, 0,0,0,0,0,0],
             [0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,0,0,0,0,0,0,0, 0,0,0,0,0,0],
-            [0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,4,2,2,3,3,3,0,0,0,0,0,0,0, 0,0,0,0,0,0],
-            [0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,2,4,1,1,3,3,3,0,0,0,0,0,0,0, 0,0,0,0,0,0],
+            [0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,2,2,4,3,3,3,0,0,0,0,0,0,0, 0,0,0,0,0,0],
+            [0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,2,1,1,4,3,3,3,0,0,0,0,0,0,0, 0,0,0,0,0,0],
             [0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,2,1,0,0,0,0,3,3,0,0,0,0,0,0,0, 0,0,0,0,0,0],
-            [0,0,0,0,0,0, 0,0,0,0,0,0,0,0,2,1,0,0,0,0,0,2,1,0,0,0,0,0,0,0, 0,0,0,0,0,0],
-            [0,0,0,0,0,0, 0,0,0,0,0,0,0,4,4,0,0,0,0,0,0,4,4,0,0,0,0,0,0,0, 0,0,0,0,0,0],
+            [0,0,0,0,0,0, 0,0,0,0,0,0,0,0,2,1,0,0,0,0,0,4,4,0,0,0,0,0,0,0, 0,0,0,0,0,0],
             [0,0,0,0,0,0, 0,0,0,0,0,0,0,2,1,0,0,0,0,0,0,2,1,0,0,0,0,0,0,0, 0,0,0,0,0,0],
+            [0,0,0,0,0,0, 0,0,0,0,0,0,0,4,4,0,0,0,0,0,0,4,4,0,0,0,0,0,0,0, 0,0,0,0,0,0],
             [0,0,0,0,0,0, 0,0,0,0,0,0,0,3,3,0,0,0,0,0,0,3,3,0,0,0,0,0,0,0, 0,0,0,0,0,0],
-            [0,0,0,0,0,0, 0,0,0,0,4,1,3,3,3,3,1,1,4,1,3,3,3,3,1,4,0,0,0,0, 0,0,0,0,0,0],
-            [0,0,0,0,0,0, 0,0,0,1,4,2,3,3,3,3,2,2,4,2,3,3,3,3,2,4,1,0,0,0, 0,0,0,0,0,0],
+            [0,0,0,0,0,0, 0,0,0,0,1,4,3,3,3,3,4,1,1,4,3,3,3,3,4,1,0,0,0,0, 0,0,0,0,0,0],
+            [0,0,0,0,0,0, 0,0,0,1,2,4,3,3,3,3,4,2,2,4,3,3,3,3,4,2,1,0,0,0, 0,0,0,0,0,0],
             [0,0,0,0,0,0, 0,0,1,2,0,0,0,3,3,0,0,0,0,0,0,3,3,0,0,0,2,1,0,0, 0,0,0,0,0,0],
-            [0,0,0,0,0,0, 0,1,2,0,0,0,0,2,1,0,0,0,0,0,0,2,1,0,0,0,0,2,1,0, 0,0,0,0,0,0],
-            [0,0,0,0,0,0, 4,4,0,0,0,0,0,2,1,0,0,0,0,0,0,2,1,0,0,0,0,0,4,4, 0,0,0,0,0,0],
+            [0,0,0,0,0,0, 0,1,2,0,0,0,0,4,4,0,0,0,0,0,0,4,4,0,0,0,0,2,1,0, 0,0,0,0,0,0],
+            [0,0,0,0,0,0, 4,4,0,0,0,0,0,2,1,0,0,0,0,0,0,2,1,0,0,0,0,0,2,1, 0,0,0,0,0,0],
             [0,0,0,0,0,0, 3,3,0,0,0,0,0,2,1,0,0,0,0,0,0,2,1,0,0,0,0,0,2,1, 0,0,0,0,0,0],
-            [1,1,1,4,1,3, 3,3,0,0,0,0,0,2,1,0,0,0,0,0,0,2,1,0,0,0,0,0,2,1, 0,0,0,0,0,0],
-            [2,2,2,4,2,3, 3,3,0,0,0,0,0,4,4,0,0,0,0,0,0,4,4,0,0,0,0,0,3,3, 0,0,0,0,0,0],
-            [0,0,0,0,0,0, 3,3,0,0,0,0,0,2,1,0,0,0,0,0,0,2,1,0,0,0,0,0,3,3, 3,1,4,1,1,1],
-            [0,0,0,0,0,0, 2,1,0,0,0,0,0,2,1,0,0,0,0,0,0,2,1,0,0,0,0,0,3,3, 3,2,4,2,2,2],
-            [0,0,0,0,0,0, 4,4,0,0,0,0,0,2,1,0,0,0,0,0,0,2,1,0,0,0,0,0,3,3, 0,0,0,0,0,0],
-            [0,0,0,0,0,0, 0,2,1,0,0,0,0,2,1,0,0,0,0,0,0,2,1,0,0,0,0,4,4,0, 0,0,0,0,0,0],
+            [1,1,1,1,4,3, 3,3,0,0,0,0,0,2,1,0,0,0,0,0,0,2,1,0,0,0,0,0,4,4, 0,0,0,0,0,0],
+            [2,2,2,2,4,3, 3,3,0,0,0,0,0,2,1,0,0,0,0,0,0,2,1,0,0,0,0,0,3,3, 0,0,0,0,0,0],
+            [0,0,0,0,0,0, 3,3,0,0,0,0,0,2,1,0,0,0,0,0,0,2,1,0,0,0,0,0,3,3, 3,4,1,1,1,1],
+            [0,0,0,0,0,0, 4,4,0,0,0,0,0,2,1,0,0,0,0,0,0,2,1,0,0,0,0,0,3,3, 3,4,2,2,2,2],
+            [0,0,0,0,0,0, 2,1,0,0,0,0,0,2,1,0,0,0,0,0,0,2,1,0,0,0,0,0,3,3, 0,0,0,0,0,0],
+            [0,0,0,0,0,0, 0,2,1,0,0,0,0,4,4,0,0,0,0,0,0,4,4,0,0,0,0,4,4,0, 0,0,0,0,0,0],
             [0,0,0,0,0,0, 0,0,2,1,0,0,0,3,3,0,0,0,0,0,0,3,3,0,0,0,1,2,0,0, 0,0,0,0,0,0],
-            [0,0,0,0,0,0, 0,0,0,2,4,1,3,3,3,3,1,1,4,1,3,3,3,3,1,4,2,0,0,0, 0,0,0,0,0,0],
-            [0,0,0,0,0,0, 0,0,0,0,4,2,3,3,3,3,2,2,4,2,3,3,3,3,2,4,0,0,0,0, 0,0,0,0,0,0],
+            [0,0,0,0,0,0, 0,0,0,2,1,4,3,3,3,3,4,1,1,4,3,3,3,3,4,1,2,0,0,0, 0,0,0,0,0,0],
+            [0,0,0,0,0,0, 0,0,0,0,2,4,3,3,3,3,4,2,2,4,3,3,3,3,4,2,0,0,0,0, 0,0,0,0,0,0],
             [0,0,0,0,0,0, 0,0,0,0,0,0,0,3,3,0,0,0,0,0,0,3,3,0,0,0,0,0,0,0, 0,0,0,0,0,0],
-            [0,0,0,0,0,0, 0,0,0,0,0,0,0,2,1,0,0,0,0,0,0,2,1,0,0,0,0,0,0,0, 0,0,0,0,0,0],
             [0,0,0,0,0,0, 0,0,0,0,0,0,0,4,4,0,0,0,0,0,0,4,4,0,0,0,0,0,0,0, 0,0,0,0,0,0],
-            [0,0,0,0,0,0, 0,0,0,0,0,0,0,2,1,0,0,0,0,0,2,1,0,0,0,0,0,0,0,0, 0,0,0,0,0,0],
+            [0,0,0,0,0,0, 0,0,0,0,0,0,0,2,1,0,0,0,0,0,0,2,1,0,0,0,0,0,0,0, 0,0,0,0,0,0],
+            [0,0,0,0,0,0, 0,0,0,0,0,0,0,4,4,0,0,0,0,0,2,1,0,0,0,0,0,0,0,0, 0,0,0,0,0,0],
             [0,0,0,0,0,0, 0,0,0,0,0,0,0,3,3,0,0,0,0,2,1,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0],
-            [0,0,0,0,0,0, 0,0,0,0,0,0,0,3,3,3,2,2,4,1,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0],
-            [0,0,0,0,0,0, 0,0,0,0,0,0,0,3,3,3,1,1,4,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0],
+            [0,0,0,0,0,0, 0,0,0,0,0,0,0,3,3,3,4,2,2,1,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0],
+            [0,0,0,0,0,0, 0,0,0,0,0,0,0,3,3,3,4,1,1,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0],
             [0,0,0,0,0,0, 0,0,0,0,0,0,0,3,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0],
             [0,0,0,0,0,0, 0,0,0,0,0,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0],
             [0,0,0,0,0,0, 0,0,0,0,0,0,0,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0],
@@ -268,7 +445,7 @@ def agent_portrayal(agent):
 
 
 
-#grid = CanvasGrid(agent_portrayal, 36, 35, 400, 400)
+grid = CanvasGrid(agent_portrayal, 36, 35, 400, 400)
 
 #server = ModularServer(Vecindad, [grid], "Reto_Equipo2", {})
 #server.port = 8522

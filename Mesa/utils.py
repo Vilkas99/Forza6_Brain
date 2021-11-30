@@ -24,7 +24,7 @@ class Node:
         self.cameFrom = None
         
 
-def AStar(startRow, startCol, endRow, endCol, graph):
+def AStar(startRow, startCol, endRow, endCol, graph, sentido):
     nodes = initializeNodes(graph)
 	
     startNode = nodes[startRow][startCol]
