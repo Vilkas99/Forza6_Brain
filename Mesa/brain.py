@@ -48,183 +48,140 @@ class CheckPoint(Agent):
     def step(self): 
         pass 
 
-class Interseccion(Agent):
-
-    AUTOSV = []
-    AUTOSL = []
-    AUTOS4 = []
-
+class InterCell(Agent):
     def __init__(self, model, pos):
         super().__init__(model.next_id(), model)
         self.pos = pos
         self.valor = 3
-        self.posicionesL = self.model.interseccionLateral
-        self.posicionesV = self.model.interseccionVertical
-        self.posiciones4 = self.model.interseccionCuatro
-        self.ordenamientoV = self.AUTOSV
-        self.ordenamientoL = self.AUTOSL
-        self.ordenamiento4 = self.AUTOS4
-        self.evaluarEntorno()
+
+
+
+class Interseccion(Agent):
+    def __init__(self, model, pos, tipo):
+        super().__init__(model.next_id(), model)
+        self.blockOfPos = pos
+        self.valor = 3
+        self.autoEspera = []
+        self.autoEliminar = []
+        self.tipo = tipo
 
     def evaluarEntorno(self):
         countCars = 0
-        
-        # ||||||||||||||||| EVALUA LAS INTERSECCIONES LATERALES ||||||||||||||||||||||
-
-        for i in self.posicionesL:
-
-            for neighbor in self.model.grid.iter_neighbors(i, moore=True):
+        for i in self.blockOfPos:
+            if self.tipo == "Vertical":
+                for neighbor in self.model.grid.iter_neighbors(i, moore=False):
                 
-                if neighbor.pos[0] == i[0] & neighbor.pos[1] != i[1]: #SIGNIFICA QUE ES VERTICAL --> Valor de 1
-                    neighbor.orientacion = 1 #Significa que viene de una calle en vertical
-
-                    if neighbor.valor == 5: #Si el valor es 4 significa que es un Agente Automovilistico :O
+                    if neighbor.valor == 5 and neighbor not in self.autoEspera: #Si el valor es 4 significa que es un Agente Automovilistico :O
                         countCars += 1 #Cuando se detectan más de un auto
+
+                        if neighbor.posicion_x == i[0] and neighbor.posicion_y != i[1]: #SIGNIFICA QUE ES VERTICAL --> Valor de 1
+                            neighbor.orientacion = 1 #Significa que viene de una calle en vertical
+
+                        elif neighbor.posicion_x != i[0] and neighbor.posicion_y == i[1]: #SIGNIFICA QUE ES HORIZONTAL --> Valor de 2
+
+                            neighbor.orientacion = 2 #Significa que viene de una calle en horizontal
 
                         if countCars > 1:
                             #Se ingresan los autos en la lista
-                            self.ordenamientoL.append(neighbor)
+                            self.autoEspera.append(neighbor)
                             #Agregar que no se repitan en la lista
                             
                             #Se detienen los autos
-                            #Automovil.detenido = True
-
-                elif neighbor.pos[0] != i[0] & neighbor.pos[1] == i[1]: #SIGNIFICA QUE ES HORIZONTAL --> Valor de 2
-
-                    neighbor.orientacion = 2 #Significa que viene de una calle en horizontal
-
-                    if neighbor.valor == 5: #Si el valor es 4 significa que es un Agente Automovilistico :O
-                        countCars += 1 #Cuando se detectan más de un auto
-
-                        if countCars > 1:
-                            #Se ingresan los autos en la lista
-                            self.ordenamientoL.append(neighbor)
-                            #Agregar que no se repitan en la lista
-
-                            #Se detienen los autos
-                            #Automovil.detenido = True
-
-        # ||||||||||||||||| EVALUA LAS INTERSECCIONES VERTICALES ||||||||||||||||||||||
-
-        for i in self.posicionesV:
-
-            for neighbor in self.model.grid.iter_neighbors(i, moore=True):
+                            #neighbor.detenido = True
+            elif self.tipo == "Hori":
+                for neighbor in self.model.grid.iter_neighbors(i, moore=False):
                 
-                if neighbor.pos[0] == i[0] & neighbor.pos[1] != i[1]: #SIGNIFICA QUE ES VERTICAL --> Valor de 1
-                    neighbor.orientacion = 1 #Significa que viene de una calle en vertical
-
-                    if neighbor.valor == 5: #Si el valor es 4 significa que es un Agente Automovilistico :O
+                    if neighbor.valor == 5 and neighbor not in self.autoEspera: #Si el valor es 4 significa que es un Agente Automovilistico :O
                         countCars += 1 #Cuando se detectan más de un auto
+
+                        if neighbor.posicion_x == i[0] and neighbor.posicion_y != i[1]: #SIGNIFICA QUE ES VERTICAL --> Valor de 1
+                            neighbor.orientacion = 1 #Significa que viene de una calle en vertical
+
+                        elif neighbor.posicion_x != i[0] and neighbor.posicion_y == i[1]: #SIGNIFICA QUE ES HORIZONTAL --> Valor de 2
+
+                            neighbor.orientacion = 2 #Significa que viene de una calle en horizontal
 
                         if countCars > 1:
                             #Se ingresan los autos en la lista
-                            self.ordenamientoV.append(neighbor)
+                            self.autoEspera.append(neighbor)
                             #Agregar que no se repitan en la lista
                             
                             #Se detienen los autos
-                            #Automovil.detenido = True
-
-                elif neighbor.pos[0] != i[0] & neighbor.pos[1] == i[1]: #SIGNIFICA QUE ES HORIZONTAL --> Valor de 2
-
-                    neighbor.orientacion = 2 #Significa que viene de una calle en horizontal
-
-                    if neighbor.valor == 5: #Si el valor es 4 significa que es un Agente Automovilistico :O
-                        countCars += 1 #Cuando se detectan más de un auto
-
-                        if countCars > 1:
-                            #Se ingresan los autos en la lista
-                            self.ordenamientoV.append(neighbor)
-                            #Agregar que no se repitan en la lista
-
-                            #Se detienen los autos
-                            #Automovil.detenido = True
-
-        # ||||||||||||||||| EVALUA LAS INTERSECCIONES DE CRUCE 4 ||||||||||||||||||||||
-
-        for i in self.posiciones4:
-
-            for neighbor in self.model.grid.iter_neighbors(i, moore=True):
+                            #neighbor.detenido = True
+            elif self.tipo == "4Cam":
+                for neighbor in self.model.grid.iter_neighbors(i, moore=False):
                 
-                if neighbor.pos[0] == i[0] & neighbor.pos[1] != i[1]: #SIGNIFICA QUE ES VERTICAL --> Valor de 1
-                    neighbor.orientacion = 1 #Significa que viene de una calle en vertical
-
-                    if neighbor.valor == 5: #Si el valor es 4 significa que es un Agente Automovilistico :O
+                    if neighbor.valor == 5 and neighbor not in self.autoEspera: #Si el valor es 4 significa que es un Agente Automovilistico :O
                         countCars += 1 #Cuando se detectan más de un auto
+
+                        if neighbor.posicion_x == i[0] and neighbor.posicion_y != i[1]: #SIGNIFICA QUE ES VERTICAL --> Valor de 1
+                            neighbor.orientacion = 1 #Significa que viene de una calle en vertical
+
+                        elif neighbor.posicion_x != i[0] and neighbor.posicion_y == i[1]: #SIGNIFICA QUE ES HORIZONTAL --> Valor de 2
+
+                            neighbor.orientacion = 2 #Significa que viene de una calle en horizontal
 
                         if countCars > 1:
                             #Se ingresan los autos en la lista
-                            self.ordenamiento4.append(neighbor)
+                            self.autoEspera.append(neighbor)
                             #Agregar que no se repitan en la lista
                             
                             #Se detienen los autos
-                            #Automovil.detenido = True
+                            #neighbor.detenido = True
 
-                elif neighbor.pos[0] != i[0] & neighbor.pos[1] == i[1]: #SIGNIFICA QUE ES HORIZONTAL --> Valor de 2
+    def cambiarSentido(self, valor):
+        if valor == 1:
+            return 2
+        return 1
 
-                    neighbor.orientacion = 2 #Significa que viene de una calle en horizontal
+    def asignacionDesplazamiento(self):
+        for i in self.autoEspera:
 
-                    if neighbor.valor == 5: #Si el valor es 4 significa que es un Agente Automovilistico :O
-                        countCars += 1 #Cuando se detectan más de un auto
+            if self.tipo == "4Cam":
+                if i.camino != "B" and i.camino != "F":
+                    if i.camino == "L":
+                        i.sentido = 1
+                    elif i.camino == "E":
+                        i.sentido = 2
+                    print(i.next_checkpoint, " : " ,i.sentido, " : ", i.orientacion)
+                #2 blanco 1 negro
+                    if i.orientacion == 1: #Significa que es Vertical
+                        print( "ABSOLUTOs:" ,abs(i.posicion_y - i.next_checkpoint[1]), ": ", abs(i.posicion_x - i.next_checkpoint[0]))
+                        if abs(i.posicion_y - i.next_checkpoint[1]) == 1 and abs(i.posicion_x - i.next_checkpoint[0]) == 3:
+                            i.sentido = self.cambiarSentido(i.sentido) #Cambiarlo
+                    elif i.orientacion == 2: #Significa que es horizontal
+                        if abs(i.posicion_x - i.next_checkpoint[0]) == 0 and abs(i.posicion_y - i.next_checkpoint[1]) == 2:
+                            i.sentido = self.cambiarSentido(i.sentido) #SE CAMBIA
 
-                        if countCars > 1:
-                            #Se ingresan los autos en la lista
-                            self.ordenamiento4.append(neighbor)
-                            #Agregar que no se repitan en la lista
+            elif self.tipo == "Vertical":
+                print(i.next_checkpoint, " : " ,i.sentido, " : ", i.orientacion)
+                #2 blanco 1 negro
+                if i.orientacion == 1: #Significa que es Vertical
+                    if abs(i.posicion_y - i.next_checkpoint[1]) == 0 and abs(i.posicion_x - i.next_checkpoint[0]) == 2:
+                        i.sentido = self.cambiarSentido(i.sentido) #Se cambia
+                elif i.orientacion == 2: #Significa que es horizontal
+                    if abs(i.posicion_y - i.next_checkpoint[1]) == 1 and abs(i.posicion_x - i.next_checkpoint[0]) == 3:
+                        i.sentido = self.cambiarSentido(i.sentido) #SE CAMBIA
 
-                            #Se detienen los autos
-                            #Automovil.detenido = True
-                                 
-                    
-    #Una vez realizado todo, esta función se encargará de hacer que los automoviles se muevan de acuerdo a su orden
-    def aignacionDesplazamiento(self):
-        for i in self.ordenamiento4:
-            print(i)
-            i.detenido = False
+            elif self.tipo == "Hori":
+                print(i.next_checkpoint, " : " ,i.sentido, " : ", i.orientacion)
+                #2 blanco 1 negro
+                if i.orientacion == 1: #Significa que es Vertical
+                    if abs(i.posicion_y - i.next_checkpoint[1]) == 3 and abs(i.posicion_x - i.next_checkpoint[0]) == 0:
+                        i.sentido = self.cambiarSentido(i.sentido) #Se cambia
+                elif i.orientacion == 2: #Significa que es horizontal
+                        i.sentido #Se mantiene
 
-            #------ REGLAS PARA EL CRUCE DE 4 CAMINOS -----
+            self.autoEliminar.append(i)
 
-            if i.orientacion == 1: #Significa que es Vertical
-                if i.destino_temporal == 1:
-                    i.sentido #SE MANTIENE
-            elif i.orientacion == 2: #Significa que es horizontal
-                if i.destino_temporal == 1:
-                    i.sentido #SE MANTIENE
-                elif i.destino_temporal == 2:
-                    i.sentido #SE CAMBIA
+    def step(self):
+        self.evaluarEntorno()
+        self.asignacionDesplazamiento()
+        for i in self.autoEliminar:
+            self.autoEspera.remove(i)
+        self.autoEliminar.clear()
 
-        for i in self.ordenamientoV:
-            print(i)
-            #i.detenido = False
 
-            #------ REGLAS PARA EL CRUCE VERTICAL -----
-
-            if i.orientacion == 1: #Significa que es Vertical
-                if i.destino_temporal == 1:
-                    i.sentido #SE MANTIENE
-                elif i.destino_temporal == 2:
-                    i.sentido #SE CAMBIA
-            elif i.orientacion == 2: #Significa que es horizontal
-                if i.destino_temporal == 1:
-                    i.sentido #SE MANTIENE
-                elif i.destino_temporal == 2:
-                    i.sentido #SE CAMBIA
-
-        for i in self.ordenamientoL:
-            print(i)
-            #i.detenido = False
-
-            #------ REGLAS PARA EL CRUCE LATERAL -----
-
-            if i.orientacion == 1: #Significa que es Vertical
-                if i.destino_temporal == 1:
-                    i.sentido #SE MANTIENE
-                elif i.destino_temporal == 2:
-                    i.sentido #SE CAMBIA
-            elif i.orientacion == 2: #Significa que es horizontal
-                if i.destino_temporal == 1:
-                    i.sentido #SE MANTIENE
-                elif i.destino_temporal == 2:
-                    i.sentido #SE CAMBIA
 class Auto(Agent):
     def __init__(self, unique_id, model, currentState):
         super().__init__(unique_id, model)
@@ -260,6 +217,7 @@ class Auto(Agent):
             self.completedDestination()
             self.finalizo = True
         else:
+            print(self.sentido)
             self.setNextAction()
     
     def evaluateNearCars(self):
@@ -281,7 +239,6 @@ class Auto(Agent):
             if (self.currentCheckpoint == len(self.model.mapOfPaths[self.camino])):
                 return None
             if posPorChecar == self.model.mapOfPaths[self.camino][self.currentCheckpoint]:
-                print("OBJETIVO ------------", posPorChecar)
                 self.currentCheckpoint += 1
                 return posPorChecar
             
@@ -402,9 +359,9 @@ class Vecindad(Model):
         }
         self.paso = 0
 
-        self.interseccionLateral = [(5,16),(5,17),(6,18),(7,18),(6,15),(7,15),(29,17),(30,17),(29,20),(30,20),(31,19),(31,18)]
-        self.interseccionCuatro = [(13,25),(14,25),(12,24),(12,23),(15,24),(15,23),(13,22),(14,22),(12,11),(12,10),(15,11),(15,10),(13,12),(14,12),(13,9),(14,9),(20,24),(20,23),(21,25),(22,25),(21,22),(22,22),(23,24),(23,23),(20,11),(20,10),(23,11),(23,10),(21,12),(22,12),(21,9),(22,9)]
-        self.interseccionVertical = [(21,2),(22,2),(21,5),(22,5),(20,3),(20,4),(13,32),(14,32),(13,29),(14,29),(15,30),(15,31)]
+        self.interseccionLateral = [[(6,16),(6,17),(7,16),(7,17)],[(29,18),(28,18),(29,19),(28,19)]]
+        self.interseccionCuatro = [[(13,10),(14,10),(13,11),(14,11)],[(13,23),(14,23),(13,24),(14,24)],[(21,10),(22,10),(21,11),(22,11)],[(21,23),(22,23),(21,24),(22,24)]]
+        self.interseccionVertical = [[(22,3),(21,3),(22,4),(21,4)],[(13,31),(14,31),(13,30),(14,30)]]
         # Reglas para crucero de 4 caminos:
         # 1.- Si el carro se encuentra la interseccion desde la parte vertical
         #   Seguir derecho O doblar hacia la derecha del carro -> mantiene el sentido 
@@ -478,22 +435,39 @@ class Vecindad(Model):
                 block = Sentido2(self, (x, y))
                 self.grid.place_agent(block, block.pos)
                 self.schedule.add(block)
-            elif self.matrix[y][x] == 3:
-                interSecc = Interseccion(self, (x, y))
-                self.grid.place_agent(interSecc, interSecc.pos)
-                self.schedule.add(interSecc)
             elif self.matrix[y][x] == 4:
                 checkP = CheckPoint(self, (x, y), "1")
                 self.grid.place_agent(checkP, checkP.pos)
                 self.schedule.add(checkP)
-                
+        
+        for i in self.interseccionLateral:
+            inter = Interseccion(self, i, "Hori")
+            for j in i:
+                miniCell = InterCell(self, j)
+                self.grid.place_agent(miniCell, miniCell.pos)
+            self.schedule.add(inter)
+
+        for i in self.interseccionVertical:
+            inter = Interseccion(self, i, "Vertical")
+            for j in i:
+                miniCell = InterCell(self, j)
+                self.grid.place_agent(miniCell, miniCell.pos)
+            self.schedule.add(inter)
+
+        for i in self.interseccionCuatro:
+            inter = Interseccion(self, i, "4Cam")
+            for j in i:
+                miniCell = InterCell(self, j)
+                self.grid.place_agent(miniCell, miniCell.pos)
+            self.schedule.add(inter)
+
         self.mapOfPaths = {
             "A" : [(22,1),(22,6),(22,8),(24,10),(29,16),(31,18)],
-            "B" : [(22,1),(22,6),(22,8),(22,13),(22,21),(22,26),(16,31),(14,33)],
-            "C" : [(22,21),(22,6),(22,8),(19,11), (16,11), (11,11), (7,14), (4,17)],
+            "B" : [(22,1),(22,6),(22,8),(22,13),(22,21),(22,26),(16,31),(14,33)], #Defectuoso
+            "C" : [(22,1),(22,6),(22,8),(19,11), (16,11), (11,11), (7,14), (4,17)],
             
             "D" : [(4,16),(7,19),(11,23),(16,23),(19,23),(24,23),(28,21),(31,18)],
-            "E" : [(4,16),(6,14),(11,10),(13,8),(19,3),(21,1)],
+            "E" : [(4,16),(6,14),(11,10),(13,8),(19,3),(21,1)], 
             "F" : [(4,16),(7,19),(11,23),(14,26),(14,28),(14,33)],
             
             "G" : [(31,19),(28,16),(24,11),(21,8),(21,6),(21,1)],
@@ -502,7 +476,7 @@ class Vecindad(Model):
             
             "J" : [(13,33),(13,28),(13,26),(13,21),(13,13),(13,8),(19,3), (21,1)],
             "K" : [(13,33),(13,28),(13,26),(11,24),(6,19),(4,17)],
-            "L" : [(13,33),(16,30),(21,26),(24,23),(28,21),(31,18)]
+            "L" : [(13,33),(16,30),(21,26),(24,23),(28,21),(31,18)] 
         }
 
         carrito = Auto(self.next_id(), self, "1")
@@ -546,7 +520,7 @@ def agent_portrayal(agent):
         return {"Shape": "rect", "w": 1, "h": 1, "Filled": "true", "Color": "Green", "Layer": 0}
     elif type(agent) is CheckPoint:
         return {"Shape": "rect", "w": 1, "h": 1, "Filled": "true", "Color": "#000055", "Layer": 0}
-    elif type(agent) is Interseccion:
+    elif type(agent) is InterCell:
         return {"Shape": "rect", "w": 1, "h": 1, "Filled": "true", "Color": "#550055", "Layer": 0}
 
 

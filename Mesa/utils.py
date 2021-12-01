@@ -91,16 +91,16 @@ def getNeighboringNodes(node, nodes):
 	row = node.row
 	col = node.col
 	
-	if row < numRows - 1:
+	if row < numRows - 1: #Abajo
 		neighbors.append(nodes[row + 1][col])
 		
-	if row > 0:
+	if row > 0: #Arriba
 		neighbors.append(nodes[row - 1][col])
 		
-	if col < numCols - 1:
+	if col < numCols - 1: #Derecha
 		neighbors.append(nodes[row][col + 1])
 		
-	if col > 0:
+	if col > 0: #Izq
 		neighbors.append(nodes[row][col - 1])
 		
 	return neighbors
