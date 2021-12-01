@@ -54,80 +54,34 @@ class InterCell(Agent):
         self.pos = pos
         self.valor = 3
 
-
-
 class Interseccion(Agent):
     def __init__(self, model, pos, tipo):
         super().__init__(model.next_id(), model)
         self.blockOfPos = pos
         self.valor = 3
         self.autoEspera = []
-        self.autoEliminar = []
         self.tipo = tipo
-
+        self.stillFindFirst = False
     def evaluarEntorno(self):
         countCars = 0
         for i in self.blockOfPos:
-            if self.tipo == "Vertical":
-                for neighbor in self.model.grid.iter_neighbors(i, moore=False):
-                
-                    if neighbor.valor == 5 and neighbor not in self.autoEspera: #Si el valor es 4 significa que es un Agente Automovilistico :O
-                        countCars += 1 #Cuando se detectan más de un auto
+            for neighbor in self.model.grid.iter_neighbors(i, moore=False):    
+                if neighbor.valor == 5 and neighbor not in self.autoEspera: #Si el valor es 4 significa que es un Agente Automovilistico :O
+                    countCars += 1 #Cuando se detectan más de un auto
+                    self.autoEspera.append(neighbor)
+                    if countCars == 1:
+                        self.stillFindFirst = True
+                    neighbor.detenido = True
+                    if neighbor.posicion_x == i[0] and neighbor.posicion_y != i[1]: #SIGNIFICA QUE ES VERTICAL --> Valor de 1
+                        neighbor.orientacion = 1 #Significa que viene de una calle en vertical
 
-                        if neighbor.posicion_x == i[0] and neighbor.posicion_y != i[1]: #SIGNIFICA QUE ES VERTICAL --> Valor de 1
-                            neighbor.orientacion = 1 #Significa que viene de una calle en vertical
+                    elif neighbor.posicion_x != i[0] and neighbor.posicion_y == i[1]: #SIGNIFICA QUE ES HORIZONTAL --> Valor de 2
+                        neighbor.orientacion = 2 #Significa que viene de una calle en horizontal
+                    
+                elif neighbor.valor == 5 and neighbor in self.autoEspera:
+                    if neighbor == self.autoEspera[0]:
+                        self.stillFindFirst = True
 
-                        elif neighbor.posicion_x != i[0] and neighbor.posicion_y == i[1]: #SIGNIFICA QUE ES HORIZONTAL --> Valor de 2
-
-                            neighbor.orientacion = 2 #Significa que viene de una calle en horizontal
-
-                        if countCars > 1:
-                            #Se ingresan los autos en la lista
-                            self.autoEspera.append(neighbor)
-                            #Agregar que no se repitan en la lista
-                            
-                            #Se detienen los autos
-                            #neighbor.detenido = True
-            elif self.tipo == "Hori":
-                for neighbor in self.model.grid.iter_neighbors(i, moore=False):
-                
-                    if neighbor.valor == 5 and neighbor not in self.autoEspera: #Si el valor es 4 significa que es un Agente Automovilistico :O
-                        countCars += 1 #Cuando se detectan más de un auto
-
-                        if neighbor.posicion_x == i[0] and neighbor.posicion_y != i[1]: #SIGNIFICA QUE ES VERTICAL --> Valor de 1
-                            neighbor.orientacion = 1 #Significa que viene de una calle en vertical
-
-                        elif neighbor.posicion_x != i[0] and neighbor.posicion_y == i[1]: #SIGNIFICA QUE ES HORIZONTAL --> Valor de 2
-
-                            neighbor.orientacion = 2 #Significa que viene de una calle en horizontal
-
-                        if countCars > 1:
-                            #Se ingresan los autos en la lista
-                            self.autoEspera.append(neighbor)
-                            #Agregar que no se repitan en la lista
-                            
-                            #Se detienen los autos
-                            #neighbor.detenido = True
-            elif self.tipo == "4Cam":
-                for neighbor in self.model.grid.iter_neighbors(i, moore=False):
-                
-                    if neighbor.valor == 5 and neighbor not in self.autoEspera: #Si el valor es 4 significa que es un Agente Automovilistico :O
-                        countCars += 1 #Cuando se detectan más de un auto
-
-                        if neighbor.posicion_x == i[0] and neighbor.posicion_y != i[1]: #SIGNIFICA QUE ES VERTICAL --> Valor de 1
-                            neighbor.orientacion = 1 #Significa que viene de una calle en vertical
-
-                        elif neighbor.posicion_x != i[0] and neighbor.posicion_y == i[1]: #SIGNIFICA QUE ES HORIZONTAL --> Valor de 2
-
-                            neighbor.orientacion = 2 #Significa que viene de una calle en horizontal
-
-                        if countCars > 1:
-                            #Se ingresan los autos en la lista
-                            self.autoEspera.append(neighbor)
-                            #Agregar que no se repitan en la lista
-                            
-                            #Se detienen los autos
-                            #neighbor.detenido = True
 
     def cambiarSentido(self, valor):
         if valor == 1:
@@ -135,51 +89,69 @@ class Interseccion(Agent):
         return 1
 
     def asignacionDesplazamiento(self):
-        for i in self.autoEspera:
+                # Reglas para crucero de 4 caminos:
+                    # 1.- Si el carro se encuentra la interseccion desde la parte vertical
+                    #   Seguir derecho O doblar hacia la derecha del carro -> mantiene el sentido 
+                    #   Doblar hacia la izquierda del carro -> cambia el sentido
+                    # 2.- Si el carro se encuentra la interseccion desde la parte horizontal
+                    #   Seguir derecho O doblar hacia la izquierda del carro -> mantiene el sentido 
+                    #   Doblar hacia la derecha del carro -> cambia el sentido
 
-            if self.tipo == "4Cam":
-                if i.camino != "B" and i.camino != "F":
-                    if i.camino == "L":
-                        i.sentido = 1
-                    elif i.camino == "E":
-                        i.sentido = 2
-                    print(i.next_checkpoint, " : " ,i.sentido, " : ", i.orientacion)
-                #2 blanco 1 negro
-                    if i.orientacion == 1: #Significa que es Vertical
-                        print( "ABSOLUTOs:" ,abs(i.posicion_y - i.next_checkpoint[1]), ": ", abs(i.posicion_x - i.next_checkpoint[0]))
-                        if abs(i.posicion_y - i.next_checkpoint[1]) == 1 and abs(i.posicion_x - i.next_checkpoint[0]) == 3:
-                            i.sentido = self.cambiarSentido(i.sentido) #Cambiarlo
-                    elif i.orientacion == 2: #Significa que es horizontal
-                        if abs(i.posicion_x - i.next_checkpoint[0]) == 0 and abs(i.posicion_y - i.next_checkpoint[1]) == 2:
+                    #Reglas para crucero 3 caminos (calles laterales):
+                    # 1.- Si el carro no cuenta con calle si quisiera seguir derecho
+                    #   Doblar hacia cualquier lado -> mantiene el sentido
+                    # 2.- Si el carro puede seguir derecho porque cuenta con calle para hacerlo
+                    #   Seguirse derecho -> cambia el sentido
+                    #   Doblar -> mantiene el sentido
+
+                    #Reglas para crucero 3 caminos (calles verticales):
+                    # 1.- Si el carro no cuenta con calle si quisiera seguir derecho
+                    #   Doblar hacia la derecha del carro -> mantiene el sentido
+                    #   Doblar hacia la izquierda del carro -> cambia el sentido 
+                    # 2.- Si el carro puede seguir derecho porque cuenta con calle para hacerlo
+                    #   Seguirse derecho -> mantiene el sentido
+                    #   Doblar -> cambia el sentido
+
+        i = self.autoEspera[0]
+        i.detenido = False
+        if self.tipo == "4Cam":
+            if i.camino != "F":
+            #2 blanco 1 negro
+                if i.orientacion == 1: #Significa que es Vertical
+                    if abs(i.posicion_y - i.next_checkpoint[1]) == 1 and abs(i.posicion_x - i.next_checkpoint[0]) == 3:
+                        i.sentido = self.cambiarSentido(i.sentido) #Cambiarlo
+                elif i.orientacion == 2: #Significa que es horizontal
+                    if abs(i.posicion_x - i.next_checkpoint[0]) == 0 and abs(i.posicion_y - i.next_checkpoint[1]) == 2:
+                        if i.camino != "G":
                             i.sentido = self.cambiarSentido(i.sentido) #SE CAMBIA
 
-            elif self.tipo == "Vertical":
-                print(i.next_checkpoint, " : " ,i.sentido, " : ", i.orientacion)
-                #2 blanco 1 negro
-                if i.orientacion == 1: #Significa que es Vertical
-                    if abs(i.posicion_y - i.next_checkpoint[1]) == 0 and abs(i.posicion_x - i.next_checkpoint[0]) == 2:
+        elif self.tipo == "Vertical":
+            #2 blanco 1 negro
+            if i.orientacion == 1: #Significa que es Vertical
+                if abs(i.posicion_y - i.next_checkpoint[1]) == 0 and abs(i.posicion_x - i.next_checkpoint[0]) == 2:
+                    if i.camino != "L":
                         i.sentido = self.cambiarSentido(i.sentido) #Se cambia
-                elif i.orientacion == 2: #Significa que es horizontal
-                    if abs(i.posicion_y - i.next_checkpoint[1]) == 1 and abs(i.posicion_x - i.next_checkpoint[0]) == 3:
-                        i.sentido = self.cambiarSentido(i.sentido) #SE CAMBIA
+            elif i.orientacion == 2: #Significa que es horizontal
+                if abs(i.posicion_y - i.next_checkpoint[1]) == 1 and abs(i.posicion_x - i.next_checkpoint[0]) == 3:
+                    i.sentido = self.cambiarSentido(i.sentido) #SE CAMBIA
 
-            elif self.tipo == "Hori":
-                print(i.next_checkpoint, " : " ,i.sentido, " : ", i.orientacion)
-                #2 blanco 1 negro
-                if i.orientacion == 1: #Significa que es Vertical
-                    if abs(i.posicion_y - i.next_checkpoint[1]) == 3 and abs(i.posicion_x - i.next_checkpoint[0]) == 0:
-                        i.sentido = self.cambiarSentido(i.sentido) #Se cambia
-                elif i.orientacion == 2: #Significa que es horizontal
-                        i.sentido #Se mantiene
+        elif self.tipo == "Hori":
+            #2 blanco 1 negro
+            if i.orientacion == 1: #Significa que es Vertical
+                if abs(i.posicion_y - i.next_checkpoint[1]) == 3 and abs(i.posicion_x - i.next_checkpoint[0]) == 0:
+                    i.sentido = self.cambiarSentido(i.sentido) #Se cambia
+            elif i.orientacion == 2: #Significa que es horizontal
+                    i.sentido #Se mantiene
 
-            self.autoEliminar.append(i)
 
     def step(self):
+        
+        self.stillFindFirst = False
         self.evaluarEntorno()
-        self.asignacionDesplazamiento()
-        for i in self.autoEliminar:
-            self.autoEspera.remove(i)
-        self.autoEliminar.clear()
+        if self.stillFindFirst == False and self.autoEspera:
+            self.autoEspera.pop(0)
+        if self.autoEspera:
+            self.asignacionDesplazamiento()
 
 
 class Auto(Agent):
@@ -205,7 +177,7 @@ class Auto(Agent):
         self.camino = self.setCamino()
         self.currentCheckpoint = 0
         self.next_checkpoint = self.findCheckpoint()
-
+        self.rotacion = 0
 
         self.currentState = currentState
     
@@ -217,7 +189,6 @@ class Auto(Agent):
             self.completedDestination()
             self.finalizo = True
         else:
-            print(self.sentido)
             self.setNextAction()
     
     def evaluateNearCars(self):
@@ -301,28 +272,39 @@ class Auto(Agent):
     def setNextAction(self):
         if (self.posicion_x, self.posicion_y) == self.next_checkpoint:
             self.next_checkpoint = self.findCheckpoint()
-        print("*****next_checkpoint********: ", self.next_checkpoint)
 
         if self.next_checkpoint is None:
             self.next_checkpoint = (self.destino_x, self.destino_y)
         self.movimientos = AStar(self.posicion_y, self.posicion_x, self.next_checkpoint[1], self.next_checkpoint[0], self.model.matrix, self.sentido)       
-        #print(self.movimientos)
         if(len(self.movimientos) > 1):     
             self.destino_tmp_x =  self.movimientos[1][1]
             self.destino_tmp_y =  self.movimientos[1][0]
-            #print("*****destino_temporal********: ", (self.destino_tmp_x,self.destino_tmp_y))
-            #print("********destino:*****************", (self.destino_x, self.destino_y))
+            self.setRotacion()
             if self.evaluateNearCars() and not self.detenido:
                 self.posicion_x = self.destino_tmp_x
                 self.posicion_y = self.destino_tmp_y
                 self.model.grid.move_agent(self, (self.posicion_x, self.posicion_y))
 
-        
-            
-
     def completedDestination(self):
         self.model.grid.remove_agent(self)
         self.model.schedule.remove(self)
+
+    def setRotacion(self):
+        if self.posicion_x < self.destino_tmp_x:
+            self.rotacion = 0
+
+        elif self.posicion_x > self.destino_tmp_x:
+            self.rotacion = 180
+
+        elif self.posicion_y < self.destino_tmp_y:
+            self.rotacion = 90
+
+        elif self.posicion_y > self.destino_tmp_y:
+            self.rotacion = 270
+
+        else:
+            self.rotacion = 0
+
     
 class Sentido1(Agent):
     def __init__(self, model, pos):
@@ -362,28 +344,7 @@ class Vecindad(Model):
         self.interseccionLateral = [[(6,16),(6,17),(7,16),(7,17)],[(29,18),(28,18),(29,19),(28,19)]]
         self.interseccionCuatro = [[(13,10),(14,10),(13,11),(14,11)],[(13,23),(14,23),(13,24),(14,24)],[(21,10),(22,10),(21,11),(22,11)],[(21,23),(22,23),(21,24),(22,24)]]
         self.interseccionVertical = [[(22,3),(21,3),(22,4),(21,4)],[(13,31),(14,31),(13,30),(14,30)]]
-        # Reglas para crucero de 4 caminos:
-        # 1.- Si el carro se encuentra la interseccion desde la parte vertical
-        #   Seguir derecho O doblar hacia la derecha del carro -> mantiene el sentido 
-        #   Doblar hacia la izquierda del carro -> cambia el sentido
-        # 2.- Si el carro se encuentra la interseccion desde la parte horizontal
-        #   Seguir derecho O doblar hacia la izquierda del carro -> mantiene el sentido 
-        #   Doblar hacia la derecha del carro -> cambia el sentido
 
-        #Reglas para crucero 3 caminos (calles laterales):
-        # 1.- Si el carro no cuenta con calle si quisiera seguir derecho
-        #   Doblar hacia cualquier lado -> mantiene el sentido
-        # 2.- Si el carro puede seguir derecho porque cuenta con calle para hacerlo
-        #   Seguirse derecho -> cambia el sentido
-        #   Doblar -> mantiene el sentido
-
-        #Reglas para crucero 3 caminos (calles verticales):
-        # 1.- Si el carro no cuenta con calle si quisiera seguir derecho
-        #   Doblar hacia la derecha del carro -> mantiene el sentido
-        #   Doblar hacia la izquierda del carro -> cambia el sentido 
-        # 2.- Si el carro puede seguir derecho porque cuenta con calle para hacerlo
-        #   Seguirse derecho -> mantiene el sentido
-        #   Doblar -> cambia el sentido
 
         self.matrix = [
             [0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,1,0,0,0,0,0,0,0, 0,0,0,0,0,0],
@@ -490,7 +451,7 @@ class Vecindad(Model):
     def step(self):
         self.paso += 1
         self.schedule.step()
-        if self.paso % 5 == 0:
+        if self.paso % 7 == 0:
             carrito = Auto(self.next_id(), self, "1")
             self.grid.place_agent(carrito, (carrito.posicion_x, carrito.posicion_y))
             self.schedule.add(carrito)
@@ -499,7 +460,7 @@ class Vecindad(Model):
     def updateInfo(self):
         data = []
         for auto in self.autos: 
-            newDataAuto = {'posX': auto.posicion_x, 'posY': auto.posicion_y, 'finalizo': auto.finalizo, "angulo": auto.orientacion}
+            newDataAuto = {'posX': auto.posicion_x, 'posY': auto.posicion_y, 'finalizo': auto.finalizo, "angulo": auto.rotacion}
             data.append(newDataAuto)
         
         return data
@@ -511,7 +472,7 @@ def agent_portrayal(agent):
     if type(agent) is WallBlock:
         return {"Shape": "rect", "w": 1, "h": 1, "Filled": "true", "Color": "Gray", "Layer": 0}
     elif type(agent) is Auto:
-        return {"Shape": "rect", "w": 1, "h": 1, "Filled": "true", "Color": "Yellow", "Layer": 0}
+        return {"Shape": "rect", "w": 1, "h": 1, "Filled": "true", "Color": "Green", "Layer": 0}
     elif type(agent) is Sentido1:
         return {"Shape": "rect", "w": 1, "h": 1, "Filled": "true", "Color": "Black", "Layer": 0}
     elif type(agent) is EdgePoint:
