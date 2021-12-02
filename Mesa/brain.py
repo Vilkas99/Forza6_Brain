@@ -486,8 +486,8 @@ def agent_portrayal(agent):
 
 
 
-#grid = CanvasGrid(agent_portrayal, 36, 35, 400, 400)
+grid = CanvasGrid(agent_portrayal, 36, 35, 400, 400)
 
-#server = ModularServer(Vecindad, [grid], "Reto_Equipo2", {})
-#server.port = 8522
-#server.launch()
+server = ModularServer(Vecindad, [grid], "Reto_Equipo2", {})
+server.port = 8522
+server.launch()
