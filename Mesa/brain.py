@@ -10,7 +10,7 @@ from mesa.visualization.UserParam import UserSettableParameter
 from mesa.datacollection import DataCollector
 from mesa.visualization.modules import ChartModule
 from tornado.gen import sleep
-from utils import AStar
+from .utils import AStar
 
 
 #Avance M5
@@ -486,8 +486,8 @@ def agent_portrayal(agent):
 
 
 
-grid = CanvasGrid(agent_portrayal, 36, 35, 400, 400)
+#grid = CanvasGrid(agent_portrayal, 36, 35, 400, 400)
 
-server = ModularServer(Vecindad, [grid], "Reto_Equipo2", {})
-server.port = 8522
-server.launch()
+#server = ModularServer(Vecindad, [grid], "Reto_Equipo2", {})
+#server.port = 8522
+#server.launch()

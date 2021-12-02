@@ -1,6 +1,6 @@
 
 from pandas import *
-from minHeap import MinHeap
+from .minHeap import MinHeap
 
 def obtenerAgente(grid, posicion):
     elementos = grid.get_neighborhood(posicion, False, True)
