@@ -183,7 +183,7 @@ class Auto(Agent):
     
     def step(self):
         
-        
+        print("Auto: " + str(self.unique_id) + ": " + str(self.posicion_x) + "," + str(self.posicion_y))
         
         if(self.posicion_x == self.destino_x and self.posicion_y == self.destino_y):
             self.completedDestination()
@@ -451,7 +451,7 @@ class Vecindad(Model):
     def step(self):
         self.paso += 1
         self.schedule.step()
-        if self.paso % 7 == 0:
+        if self.paso % 12 == 0:
             carrito = Auto(self.next_id(), self, "1")
             self.grid.place_agent(carrito, (carrito.posicion_x, carrito.posicion_y))
             self.schedule.add(carrito)
