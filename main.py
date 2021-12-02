@@ -19,8 +19,8 @@ def stepInfo():
     if (len(modelado) == 0):
         return 'error: No hay ningún modelo', 404
     else:
-        vecindad = modelado[0]
-        vecindad.step()
+        vecindad = modelado[-1]
+        vecindad.step() 
         return jsonify(vecindad.updateInfo())
 
 
