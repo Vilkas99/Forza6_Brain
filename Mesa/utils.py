@@ -1,6 +1,6 @@
 
 from pandas import *
-from .minHeap import MinHeap
+from minHeap import MinHeap
 
 def obtenerAgente(grid, posicion):
     elementos = grid.get_neighborhood(posicion, False, True)
@@ -43,7 +43,7 @@ def AStar(startRow, startCol, endRow, endCol, graph, sentido):
 			
         neighbors = getNeighboringNodes(currentMinDistanceNode, nodes)
         for neighbor in neighbors:
-            if neighbor.value == 0:
+            if neighbor.value != sentido and neighbor.value != 3 and neighbor.value != 4 and neighbor.value != 5:
                 continue
 			
             tentativeDistanceToNeighbor = currentMinDistanceNode.distanceFromStart + 1
@@ -91,16 +91,16 @@ def getNeighboringNodes(node, nodes):
 	row = node.row
 	col = node.col
 	
-	if row < numRows - 1:
+	if row < numRows - 1: #Abajo
 		neighbors.append(nodes[row + 1][col])
 		
-	if row > 0:
+	if row > 0: #Arriba
 		neighbors.append(nodes[row - 1][col])
 		
-	if col < numCols - 1:
+	if col < numCols - 1: #Derecha
 		neighbors.append(nodes[row][col + 1])
 		
-	if col > 0:
+	if col > 0: #Izq
 		neighbors.append(nodes[row][col - 1])
 		
 	return neighbors
