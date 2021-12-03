@@ -291,16 +291,16 @@ class Auto(Agent):
 
     def setRotacion(self):
         if self.posicion_x < self.destino_tmp_x:
-            self.rotacion = 0
-
-        elif self.posicion_x > self.destino_tmp_x:
-            self.rotacion = 180
-
-        elif self.posicion_y < self.destino_tmp_y:
             self.rotacion = 90
 
-        elif self.posicion_y > self.destino_tmp_y:
+        elif self.posicion_x > self.destino_tmp_x:
             self.rotacion = 270
+
+        elif self.posicion_y < self.destino_tmp_y:
+            self.rotacion = 0
+
+        elif self.posicion_y > self.destino_tmp_y:
+            self.rotacion = 180
 
         else:
             self.rotacion = 0
